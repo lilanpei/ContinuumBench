@@ -1,0 +1,5 @@
+split: test
+entries:
+  - scenario: split_inference
+    family: vision
+    config: configs/split_inference_small.yaml

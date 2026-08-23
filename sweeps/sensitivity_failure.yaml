@@ -1,0 +1,747 @@
+name: sensitivity_failure
+config: configs/eo_small.yaml
+seeds:
+- 0
+- 1
+- 2
+overrides:
+  epochs: 120
+  drain_epochs: 60
+  workload:
+    repeat: true
+  infrastructure:
+    contact_schedule:
+      repeat: true
+runs:
+- name: eo_failure_none_joint
+  controller: separated_loops
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: disabled
+        node_failure_probability: 0.0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_failure_none_hpa
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: disabled
+        node_failure_probability: 0.0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_failure_none_keda
+  controller: keda
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: disabled
+        node_failure_probability: 0.0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_failure_none_best_fit
+  controller: best_fit
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: disabled
+        node_failure_probability: 0.0
+- name: eo_failure_none_learned_stub
+  controller: learned_stub
+  config: configs/eo_small.yaml
+  overrides: &id001
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: disabled
+        node_failure_probability: 0.0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_failure_none_rl_meta
+  controller: rl_meta
+  config: configs/eo_small.yaml
+  overrides: *id001
+- name: eo_failure_mild_joint
+  controller: separated_loops
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_failure_mild_hpa
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_failure_mild_keda
+  controller: keda
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_failure_mild_best_fit
+  controller: best_fit
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+- name: eo_failure_mild_learned_stub
+  controller: learned_stub
+  config: configs/eo_small.yaml
+  overrides: &id002
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_failure_mild_rl_meta
+  controller: rl_meta
+  config: configs/eo_small.yaml
+  overrides: *id002
+- name: eo_failure_stress_joint
+  controller: separated_loops
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.08
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_failure_stress_hpa
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.08
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_failure_stress_keda
+  controller: keda
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.08
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_failure_stress_best_fit
+  controller: best_fit
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.08
+- name: eo_failure_stress_learned_stub
+  controller: learned_stub
+  config: configs/eo_small.yaml
+  overrides: &id003
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.08
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_failure_stress_rl_meta
+  controller: rl_meta
+  config: configs/eo_small.yaml
+  overrides: *id003
+- name: driving_failure_none_joint
+  controller: separated_loops
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: disabled
+        node_failure_probability: 0.0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_failure_none_hpa
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: disabled
+        node_failure_probability: 0.0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_failure_none_keda
+  controller: keda
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: disabled
+        node_failure_probability: 0.0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_failure_none_best_fit
+  controller: best_fit
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: disabled
+        node_failure_probability: 0.0
+- name: driving_failure_none_learned_stub
+  controller: learned_stub
+  config: configs/driving_small.yaml
+  overrides: &id004
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: disabled
+        node_failure_probability: 0.0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_failure_none_rl_meta
+  controller: rl_meta
+  config: configs/driving_small.yaml
+  overrides: *id004
+- name: driving_failure_mild_joint
+  controller: separated_loops
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_failure_mild_hpa
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_failure_mild_keda
+  controller: keda
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_failure_mild_best_fit
+  controller: best_fit
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+- name: driving_failure_mild_learned_stub
+  controller: learned_stub
+  config: configs/driving_small.yaml
+  overrides: &id005
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_failure_mild_rl_meta
+  controller: rl_meta
+  config: configs/driving_small.yaml
+  overrides: *id005
+- name: driving_failure_stress_joint
+  controller: separated_loops
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.08
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_failure_stress_hpa
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.08
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_failure_stress_keda
+  controller: keda
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.08
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_failure_stress_best_fit
+  controller: best_fit
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.08
+- name: driving_failure_stress_learned_stub
+  controller: learned_stub
+  config: configs/driving_small.yaml
+  overrides: &id006
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.08
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_failure_stress_rl_meta
+  controller: rl_meta
+  config: configs/driving_small.yaml
+  overrides: *id006
+- name: split_failure_none_joint
+  controller: separated_loops
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: disabled
+        node_failure_probability: 0.0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_failure_none_hpa
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: disabled
+        node_failure_probability: 0.0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_failure_none_keda
+  controller: keda
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: disabled
+        node_failure_probability: 0.0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_failure_none_best_fit
+  controller: best_fit
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: disabled
+        node_failure_probability: 0.0
+- name: split_failure_none_learned_stub
+  controller: learned_stub
+  config: configs/split_inference_small.yaml
+  overrides: &id007
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: disabled
+        node_failure_probability: 0.0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_failure_none_rl_meta
+  controller: rl_meta
+  config: configs/split_inference_small.yaml
+  overrides: *id007
+- name: split_failure_mild_joint
+  controller: separated_loops
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_failure_mild_hpa
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_failure_mild_keda
+  controller: keda
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_failure_mild_best_fit
+  controller: best_fit
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+- name: split_failure_mild_learned_stub
+  controller: learned_stub
+  config: configs/split_inference_small.yaml
+  overrides: &id008
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_failure_mild_rl_meta
+  controller: rl_meta
+  config: configs/split_inference_small.yaml
+  overrides: *id008
+- name: split_failure_stress_joint
+  controller: separated_loops
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.08
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_failure_stress_hpa
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.08
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_failure_stress_keda
+  controller: keda
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.08
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_failure_stress_best_fit
+  controller: best_fit
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.08
+- name: split_failure_stress_learned_stub
+  controller: learned_stub
+  config: configs/split_inference_small.yaml
+  overrides: &id009
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.08
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_failure_stress_rl_meta
+  controller: rl_meta
+  config: configs/split_inference_small.yaml
+  overrides: *id009
+- name: industrial_failure_none_joint
+  controller: separated_loops
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: disabled
+        node_failure_probability: 0.0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_failure_none_hpa
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: disabled
+        node_failure_probability: 0.0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_failure_none_keda
+  controller: keda
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: disabled
+        node_failure_probability: 0.0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_failure_none_best_fit
+  controller: best_fit
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: disabled
+        node_failure_probability: 0.0
+- name: industrial_failure_none_learned_stub
+  controller: learned_stub
+  config: configs/industrial_iot_small.yaml
+  overrides: &id010
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: disabled
+        node_failure_probability: 0.0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_failure_none_rl_meta
+  controller: rl_meta
+  config: configs/industrial_iot_small.yaml
+  overrides: *id010
+- name: industrial_failure_mild_joint
+  controller: separated_loops
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_failure_mild_hpa
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_failure_mild_keda
+  controller: keda
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_failure_mild_best_fit
+  controller: best_fit
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+- name: industrial_failure_mild_learned_stub
+  controller: learned_stub
+  config: configs/industrial_iot_small.yaml
+  overrides: &id011
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_failure_mild_rl_meta
+  controller: rl_meta
+  config: configs/industrial_iot_small.yaml
+  overrides: *id011
+- name: industrial_failure_stress_joint
+  controller: separated_loops
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.08
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_failure_stress_hpa
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.08
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_failure_stress_keda
+  controller: keda
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.08
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_failure_stress_best_fit
+  controller: best_fit
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.08
+- name: industrial_failure_stress_learned_stub
+  controller: learned_stub
+  config: configs/industrial_iot_small.yaml
+  overrides: &id012
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.08
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_failure_stress_rl_meta
+  controller: rl_meta
+  config: configs/industrial_iot_small.yaml
+  overrides: *id012

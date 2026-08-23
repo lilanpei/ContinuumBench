@@ -1,0 +1,95 @@
+schema_version: 1
+kind: network_profiles
+description: Network calibration profiles spanning placeholder, emulated, and public-trace-backed paper rerun inputs.
+profiles:
+  iot_edge_stable:
+    source_tier: iot
+    target_tier: edge
+    regime: stable_low_latency
+    latency_ms:
+      median: 12.0
+      p95: 18.0
+    bandwidth_mbps:
+      sustained: 85.0
+      degraded: 55.0
+    loss_percent: 0.1
+    source: placeholder
+    notes: Replace with measured or emulated IoT-to-edge RTT and throughput.
+  edge_cloud_wan:
+    source_tier: edge
+    target_tier: cloud
+    regime: wan
+    latency_ms:
+      median: 42.0
+      p95: 68.0
+    bandwidth_mbps:
+      sustained: 220.0
+      degraded: 140.0
+    loss_percent: 0.2
+    source: placeholder
+    notes: Replace with edge-to-cloud WAN measurements.
+  edge_cloud_intermittent:
+    source_tier: edge
+    target_tier: cloud
+    regime: intermittent_contact
+    latency_ms:
+      median: 95.0
+      p95: 180.0
+    bandwidth_mbps:
+      sustained: 40.0
+      degraded: 12.0
+    loss_percent: 1.5
+    source: placeholder
+    notes: Placeholder for degraded or intermittent contact regimes.
+  edge_cloud_emulated_v1:
+    source_tier: edge
+    target_tier: cloud
+    regime: emulated_rerun_v1
+    latency_ms:
+      median: 38.0
+      p95: 52.0
+    bandwidth_mbps:
+      sustained: 180.0
+      degraded: 135.0
+    loss_percent: 0.05
+    source: emulated_netem_bench_v1
+    notes: Representative emulated edge-to-cloud profile for calibrated paper reruns.
+  edge_cloud_tracebacked_v1:
+    source_tier: edge
+    target_tier: cloud
+    regime: public_tracebacked_edge_cloud_v1
+    latency_ms:
+      median: 34.0
+      p95: 58.0
+    bandwidth_mbps:
+      sustained: 160.0
+      degraded: 110.0
+    loss_percent: 0.1
+    source: public_tracebacked_ripe_atlas_mlab_v1
+    notes: Public-trace-backed edge-to-cloud profile for split-inference and industrial IoT reruns; not a measured-lab value.
+  vehicular_edge_cloud_tracebacked_v1:
+    source_tier: edge
+    target_tier: cloud
+    regime: public_tracebacked_vehicular_edge_cloud_v1
+    latency_ms:
+      median: 28.0
+      p95: 65.0
+    bandwidth_mbps:
+      sustained: 95.0
+      degraded: 45.0
+    loss_percent: 0.3
+    source: public_tracebacked_lust_ripe_atlas_mlab_v1
+    notes: Public-trace-backed vehicular edge-to-cloud profile for driving_v2x reruns; not a measured-lab value.
+  space_ground_tracebacked_v1:
+    source_tier: space
+    target_tier: edge
+    regime: public_tracebacked_space_ground_v1
+    latency_ms:
+      median: 540.0
+      p95: 820.0
+    bandwidth_mbps:
+      sustained: 28.0
+      degraded: 9.0
+    loss_percent: 0.6
+    source: public_tracebacked_celestrak_hypatia_v1
+    notes: Public-trace-backed space-to-edge profile for eo_dual_stream reruns; not a measured-lab value.

@@ -1,0 +1,65 @@
+scenario: eo_dual_stream
+realism_tier: T4
+epochs: 40
+step_seconds: 1.0
+
+scenario_config:
+  application_id: EO_DualStreamTraceSmall
+
+infrastructure:
+  infrastructure_id: eo_trace_infra
+  n_space: 1
+  n_iot: 2
+  n_edge: 2
+  n_cloud: 1
+  contact_schedule:
+    mode: trace
+    path: src/continuum_bench/calibration/contact_traces/eo_space_ground_small.csv
+    default_bandwidth_mbps: 0
+
+workload:
+  streams:
+    SpaceSource:
+      generator: piecewise
+      segments:
+        - epochs: 10
+          rate: 0.8
+        - epochs: 15
+          rate: 2.6
+        - epochs: 15
+          rate: 1.1
+    IoTSource:
+      generator: piecewise
+      segments:
+        - epochs: 20
+          rate: 2.0
+        - epochs: 10
+          rate: 3.5
+        - epochs: 10
+          rate: 1.6
+
+stages:
+  Sink:
+    deadline_s: 100.0
+
+scaling:
+  pools:
+    BulkPath:
+      min_workers: 0
+      initial_workers: 1
+      max_workers: 4
+  queue_up_threshold: 16
+  queue_down_threshold: 4
+  age_up_threshold_s: 16
+  age_down_threshold_s: 4
+  ttl_pressure_up_threshold: 0.22
+  ttl_pressure_down_threshold: 0.08
+  cooldown_epochs: 2
+  scale_step: 1
+
+placement:
+  strategy: min_latency
+  place_every_epochs: 2
+
+calibration:
+  network_profile: space_ground_tracebacked_v1

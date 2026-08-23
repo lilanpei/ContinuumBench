@@ -1,0 +1,1366 @@
+name: realism_ladder
+config: configs/eo_small.yaml
+seeds:
+- 0
+- 1
+- 2
+overrides:
+  epochs: 120
+  drain_epochs: 60
+  workload:
+    repeat: true
+runs:
+- name: eo_t0_joint
+  controller: separated_loops
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t0_hpa
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t0_keda
+  controller: keda
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t0_best_fit
+  controller: best_fit
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T0
+- name: eo_t0_round_robin
+  controller: round_robin
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T0
+- name: eo_t0_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/eo_small.yaml
+  overrides: &id001
+    realism_tier: T0
+- name: eo_t0_milp
+  controller: placement_only:milp
+  config: configs/eo_small.yaml
+  overrides: *id001
+- name: eo_t0_learned_stub
+  controller: learned_stub
+  config: configs/eo_small.yaml
+  overrides: &id002
+    realism_tier: T0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t0_rl_meta
+  controller: rl_meta
+  config: configs/eo_small.yaml
+  overrides: *id002
+- name: eo_t1_joint
+  controller: separated_loops
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t1_hpa
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t1_keda
+  controller: keda
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t1_best_fit
+  controller: best_fit
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+- name: eo_t1_round_robin
+  controller: round_robin
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+- name: eo_t1_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/eo_small.yaml
+  overrides: &id003
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+- name: eo_t1_milp
+  controller: placement_only:milp
+  config: configs/eo_small.yaml
+  overrides: *id003
+- name: eo_t1_learned_stub
+  controller: learned_stub
+  config: configs/eo_small.yaml
+  overrides: &id004
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t1_rl_meta
+  controller: rl_meta
+  config: configs/eo_small.yaml
+  overrides: *id004
+- name: eo_t2_joint
+  controller: separated_loops
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t2_hpa
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t2_keda
+  controller: keda
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t2_best_fit
+  controller: best_fit
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+- name: eo_t2_round_robin
+  controller: round_robin
+  config: configs/eo_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+- name: eo_t2_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/eo_small.yaml
+  overrides: &id005
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+- name: eo_t2_milp
+  controller: placement_only:milp
+  config: configs/eo_small.yaml
+  overrides: *id005
+- name: eo_t2_learned_stub
+  controller: learned_stub
+  config: configs/eo_small.yaml
+  overrides: &id006
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t2_rl_meta
+  controller: rl_meta
+  config: configs/eo_small.yaml
+  overrides: *id006
+- name: eo_t3_joint
+  controller: separated_loops
+  config: configs/eo_trace_small.yaml
+  overrides:
+    realism_tier: T3
+    calibration: null
+    infrastructure:
+      contact_schedule:
+        repeat: true
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t3_hpa
+  controller: hpa
+  config: configs/eo_trace_small.yaml
+  overrides:
+    realism_tier: T3
+    calibration: null
+    infrastructure:
+      contact_schedule:
+        repeat: true
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t3_keda
+  controller: keda
+  config: configs/eo_trace_small.yaml
+  overrides:
+    realism_tier: T3
+    calibration: null
+    infrastructure:
+      contact_schedule:
+        repeat: true
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t3_best_fit
+  controller: best_fit
+  config: configs/eo_trace_small.yaml
+  overrides:
+    realism_tier: T3
+    calibration: null
+    infrastructure:
+      contact_schedule:
+        repeat: true
+- name: eo_t3_round_robin
+  controller: round_robin
+  config: configs/eo_trace_small.yaml
+  overrides:
+    realism_tier: T3
+    calibration: null
+    infrastructure:
+      contact_schedule:
+        repeat: true
+- name: eo_t3_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/eo_trace_small.yaml
+  overrides: &id007
+    realism_tier: T3
+    calibration: null
+    infrastructure:
+      contact_schedule:
+        repeat: true
+- name: eo_t3_milp
+  controller: placement_only:milp
+  config: configs/eo_trace_small.yaml
+  overrides: *id007
+- name: eo_t3_learned_stub
+  controller: learned_stub
+  config: configs/eo_trace_small.yaml
+  overrides: &id008
+    realism_tier: T3
+    calibration: null
+    infrastructure:
+      contact_schedule:
+        repeat: true
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t3_rl_meta
+  controller: rl_meta
+  config: configs/eo_trace_small.yaml
+  overrides: *id008
+- name: eo_t4_joint
+  controller: separated_loops
+  config: configs/eo_trace_small.yaml
+  overrides:
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: space_ground_tracebacked_v1
+    infrastructure:
+      contact_schedule:
+        repeat: true
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t4_hpa
+  controller: hpa
+  config: configs/eo_trace_small.yaml
+  overrides:
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: space_ground_tracebacked_v1
+    infrastructure:
+      contact_schedule:
+        repeat: true
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t4_keda
+  controller: keda
+  config: configs/eo_trace_small.yaml
+  overrides:
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: space_ground_tracebacked_v1
+    infrastructure:
+      contact_schedule:
+        repeat: true
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t4_best_fit
+  controller: best_fit
+  config: configs/eo_trace_small.yaml
+  overrides:
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: space_ground_tracebacked_v1
+    infrastructure:
+      contact_schedule:
+        repeat: true
+- name: eo_t4_round_robin
+  controller: round_robin
+  config: configs/eo_trace_small.yaml
+  overrides:
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: space_ground_tracebacked_v1
+    infrastructure:
+      contact_schedule:
+        repeat: true
+- name: eo_t4_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/eo_trace_small.yaml
+  overrides: &id009
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: space_ground_tracebacked_v1
+    infrastructure:
+      contact_schedule:
+        repeat: true
+- name: eo_t4_milp
+  controller: placement_only:milp
+  config: configs/eo_trace_small.yaml
+  overrides: *id009
+- name: eo_t4_learned_stub
+  controller: learned_stub
+  config: configs/eo_trace_small.yaml
+  overrides: &id010
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: space_ground_tracebacked_v1
+    infrastructure:
+      contact_schedule:
+        repeat: true
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t4_rl_meta
+  controller: rl_meta
+  config: configs/eo_trace_small.yaml
+  overrides: *id010
+- name: driving_t0_joint
+  controller: separated_loops
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t0_hpa
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t0_keda
+  controller: keda
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t0_best_fit
+  controller: best_fit
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T0
+- name: driving_t0_round_robin
+  controller: round_robin
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T0
+- name: driving_t0_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/driving_small.yaml
+  overrides: &id011
+    realism_tier: T0
+- name: driving_t0_milp
+  controller: placement_only:milp
+  config: configs/driving_small.yaml
+  overrides: *id011
+- name: driving_t0_learned_stub
+  controller: learned_stub
+  config: configs/driving_small.yaml
+  overrides: &id012
+    realism_tier: T0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t0_rl_meta
+  controller: rl_meta
+  config: configs/driving_small.yaml
+  overrides: *id012
+- name: driving_t1_joint
+  controller: separated_loops
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t1_hpa
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t1_keda
+  controller: keda
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t1_best_fit
+  controller: best_fit
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+- name: driving_t1_round_robin
+  controller: round_robin
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+- name: driving_t1_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/driving_small.yaml
+  overrides: &id013
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+- name: driving_t1_milp
+  controller: placement_only:milp
+  config: configs/driving_small.yaml
+  overrides: *id013
+- name: driving_t1_learned_stub
+  controller: learned_stub
+  config: configs/driving_small.yaml
+  overrides: &id014
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t1_rl_meta
+  controller: rl_meta
+  config: configs/driving_small.yaml
+  overrides: *id014
+- name: driving_t2_joint
+  controller: separated_loops
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t2_hpa
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t2_keda
+  controller: keda
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t2_best_fit
+  controller: best_fit
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+- name: driving_t2_round_robin
+  controller: round_robin
+  config: configs/driving_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+- name: driving_t2_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/driving_small.yaml
+  overrides: &id015
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+- name: driving_t2_milp
+  controller: placement_only:milp
+  config: configs/driving_small.yaml
+  overrides: *id015
+- name: driving_t2_learned_stub
+  controller: learned_stub
+  config: configs/driving_small.yaml
+  overrides: &id016
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t2_rl_meta
+  controller: rl_meta
+  config: configs/driving_small.yaml
+  overrides: *id016
+- name: driving_t3_joint
+  controller: separated_loops
+  config: configs/driving_trace_small.yaml
+  overrides:
+    realism_tier: T3
+    calibration: null
+    infrastructure:
+      contact_schedule:
+        repeat: true
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t3_hpa
+  controller: hpa
+  config: configs/driving_trace_small.yaml
+  overrides:
+    realism_tier: T3
+    calibration: null
+    infrastructure:
+      contact_schedule:
+        repeat: true
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t3_keda
+  controller: keda
+  config: configs/driving_trace_small.yaml
+  overrides:
+    realism_tier: T3
+    calibration: null
+    infrastructure:
+      contact_schedule:
+        repeat: true
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t3_best_fit
+  controller: best_fit
+  config: configs/driving_trace_small.yaml
+  overrides:
+    realism_tier: T3
+    calibration: null
+    infrastructure:
+      contact_schedule:
+        repeat: true
+- name: driving_t3_round_robin
+  controller: round_robin
+  config: configs/driving_trace_small.yaml
+  overrides:
+    realism_tier: T3
+    calibration: null
+    infrastructure:
+      contact_schedule:
+        repeat: true
+- name: driving_t3_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/driving_trace_small.yaml
+  overrides: &id017
+    realism_tier: T3
+    calibration: null
+    infrastructure:
+      contact_schedule:
+        repeat: true
+- name: driving_t3_milp
+  controller: placement_only:milp
+  config: configs/driving_trace_small.yaml
+  overrides: *id017
+- name: driving_t3_learned_stub
+  controller: learned_stub
+  config: configs/driving_trace_small.yaml
+  overrides: &id018
+    realism_tier: T3
+    calibration: null
+    infrastructure:
+      contact_schedule:
+        repeat: true
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t3_rl_meta
+  controller: rl_meta
+  config: configs/driving_trace_small.yaml
+  overrides: *id018
+- name: driving_t4_joint
+  controller: separated_loops
+  config: configs/driving_trace_small.yaml
+  overrides:
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: vehicular_edge_cloud_tracebacked_v1
+    infrastructure:
+      contact_schedule:
+        repeat: true
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t4_hpa
+  controller: hpa
+  config: configs/driving_trace_small.yaml
+  overrides:
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: vehicular_edge_cloud_tracebacked_v1
+    infrastructure:
+      contact_schedule:
+        repeat: true
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t4_keda
+  controller: keda
+  config: configs/driving_trace_small.yaml
+  overrides:
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: vehicular_edge_cloud_tracebacked_v1
+    infrastructure:
+      contact_schedule:
+        repeat: true
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t4_best_fit
+  controller: best_fit
+  config: configs/driving_trace_small.yaml
+  overrides:
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: vehicular_edge_cloud_tracebacked_v1
+    infrastructure:
+      contact_schedule:
+        repeat: true
+- name: driving_t4_round_robin
+  controller: round_robin
+  config: configs/driving_trace_small.yaml
+  overrides:
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: vehicular_edge_cloud_tracebacked_v1
+    infrastructure:
+      contact_schedule:
+        repeat: true
+- name: driving_t4_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/driving_trace_small.yaml
+  overrides: &id019
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: vehicular_edge_cloud_tracebacked_v1
+    infrastructure:
+      contact_schedule:
+        repeat: true
+- name: driving_t4_milp
+  controller: placement_only:milp
+  config: configs/driving_trace_small.yaml
+  overrides: *id019
+- name: driving_t4_learned_stub
+  controller: learned_stub
+  config: configs/driving_trace_small.yaml
+  overrides: &id020
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: vehicular_edge_cloud_tracebacked_v1
+    infrastructure:
+      contact_schedule:
+        repeat: true
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t4_rl_meta
+  controller: rl_meta
+  config: configs/driving_trace_small.yaml
+  overrides: *id020
+- name: split_t0_joint
+  controller: separated_loops
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t0_hpa
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t0_keda
+  controller: keda
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t0_best_fit
+  controller: best_fit
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T0
+- name: split_t0_round_robin
+  controller: round_robin
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T0
+- name: split_t0_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/split_inference_small.yaml
+  overrides: &id021
+    realism_tier: T0
+- name: split_t0_milp
+  controller: placement_only:milp
+  config: configs/split_inference_small.yaml
+  overrides: *id021
+- name: split_t0_learned_stub
+  controller: learned_stub
+  config: configs/split_inference_small.yaml
+  overrides: &id022
+    realism_tier: T0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t0_rl_meta
+  controller: rl_meta
+  config: configs/split_inference_small.yaml
+  overrides: *id022
+- name: split_t1_joint
+  controller: separated_loops
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t1_hpa
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t1_keda
+  controller: keda
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t1_best_fit
+  controller: best_fit
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+- name: split_t1_round_robin
+  controller: round_robin
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+- name: split_t1_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/split_inference_small.yaml
+  overrides: &id023
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+- name: split_t1_milp
+  controller: placement_only:milp
+  config: configs/split_inference_small.yaml
+  overrides: *id023
+- name: split_t1_learned_stub
+  controller: learned_stub
+  config: configs/split_inference_small.yaml
+  overrides: &id024
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t1_rl_meta
+  controller: rl_meta
+  config: configs/split_inference_small.yaml
+  overrides: *id024
+- name: split_t2_joint
+  controller: separated_loops
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t2_hpa
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t2_keda
+  controller: keda
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t2_best_fit
+  controller: best_fit
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+- name: split_t2_round_robin
+  controller: round_robin
+  config: configs/split_inference_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+- name: split_t2_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/split_inference_small.yaml
+  overrides: &id025
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+- name: split_t2_milp
+  controller: placement_only:milp
+  config: configs/split_inference_small.yaml
+  overrides: *id025
+- name: split_t2_learned_stub
+  controller: learned_stub
+  config: configs/split_inference_small.yaml
+  overrides: &id026
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t2_rl_meta
+  controller: rl_meta
+  config: configs/split_inference_small.yaml
+  overrides: *id026
+- name: split_t4_joint
+  controller: separated_loops
+  config: configs/split_inference_trace_small.yaml
+  overrides:
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: edge_cloud_tracebacked_v1
+      service_profile_set: split_inference_batch_lab_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t4_hpa
+  controller: hpa
+  config: configs/split_inference_trace_small.yaml
+  overrides:
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: edge_cloud_tracebacked_v1
+      service_profile_set: split_inference_batch_lab_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t4_keda
+  controller: keda
+  config: configs/split_inference_trace_small.yaml
+  overrides:
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: edge_cloud_tracebacked_v1
+      service_profile_set: split_inference_batch_lab_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t4_best_fit
+  controller: best_fit
+  config: configs/split_inference_trace_small.yaml
+  overrides:
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: edge_cloud_tracebacked_v1
+      service_profile_set: split_inference_batch_lab_v1
+- name: split_t4_round_robin
+  controller: round_robin
+  config: configs/split_inference_trace_small.yaml
+  overrides:
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: edge_cloud_tracebacked_v1
+      service_profile_set: split_inference_batch_lab_v1
+- name: split_t4_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/split_inference_trace_small.yaml
+  overrides: &id027
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: edge_cloud_tracebacked_v1
+      service_profile_set: split_inference_batch_lab_v1
+- name: split_t4_milp
+  controller: placement_only:milp
+  config: configs/split_inference_trace_small.yaml
+  overrides: *id027
+- name: split_t4_learned_stub
+  controller: learned_stub
+  config: configs/split_inference_trace_small.yaml
+  overrides: &id028
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: edge_cloud_tracebacked_v1
+      service_profile_set: split_inference_batch_lab_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t4_rl_meta
+  controller: rl_meta
+  config: configs/split_inference_trace_small.yaml
+  overrides: *id028
+- name: industrial_t0_joint
+  controller: separated_loops
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t0_hpa
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t0_keda
+  controller: keda
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t0_best_fit
+  controller: best_fit
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T0
+- name: industrial_t0_round_robin
+  controller: round_robin
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T0
+- name: industrial_t0_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/industrial_iot_small.yaml
+  overrides: &id029
+    realism_tier: T0
+- name: industrial_t0_milp
+  controller: placement_only:milp
+  config: configs/industrial_iot_small.yaml
+  overrides: *id029
+- name: industrial_t0_learned_stub
+  controller: learned_stub
+  config: configs/industrial_iot_small.yaml
+  overrides: &id030
+    realism_tier: T0
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t0_rl_meta
+  controller: rl_meta
+  config: configs/industrial_iot_small.yaml
+  overrides: *id030
+- name: industrial_t1_joint
+  controller: separated_loops
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t1_hpa
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t1_keda
+  controller: keda
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t1_best_fit
+  controller: best_fit
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+- name: industrial_t1_round_robin
+  controller: round_robin
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+- name: industrial_t1_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/industrial_iot_small.yaml
+  overrides: &id031
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+- name: industrial_t1_milp
+  controller: placement_only:milp
+  config: configs/industrial_iot_small.yaml
+  overrides: *id031
+- name: industrial_t1_learned_stub
+  controller: learned_stub
+  config: configs/industrial_iot_small.yaml
+  overrides: &id032
+    realism_tier: T1
+    calibration:
+      energy_profile: v2x_edge_iot_energy_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t1_rl_meta
+  controller: rl_meta
+  config: configs/industrial_iot_small.yaml
+  overrides: *id032
+- name: industrial_t2_joint
+  controller: separated_loops
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t2_hpa
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t2_keda
+  controller: keda
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t2_best_fit
+  controller: best_fit
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+- name: industrial_t2_round_robin
+  controller: round_robin
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+- name: industrial_t2_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/industrial_iot_small.yaml
+  overrides: &id033
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+- name: industrial_t2_milp
+  controller: placement_only:milp
+  config: configs/industrial_iot_small.yaml
+  overrides: *id033
+- name: industrial_t2_learned_stub
+  controller: learned_stub
+  config: configs/industrial_iot_small.yaml
+  overrides: &id034
+    realism_tier: T2
+    reliability:
+      failures:
+        mode: bernoulli
+        node_failure_probability: 0.03
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t2_rl_meta
+  controller: rl_meta
+  config: configs/industrial_iot_small.yaml
+  overrides: *id034
+- name: industrial_t4_joint
+  controller: separated_loops
+  config: configs/industrial_iot_trace_small.yaml
+  overrides:
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: edge_cloud_tracebacked_v1
+      service_profile_set: industrial_iot_batch_lab_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t4_hpa
+  controller: hpa
+  config: configs/industrial_iot_trace_small.yaml
+  overrides:
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: edge_cloud_tracebacked_v1
+      service_profile_set: industrial_iot_batch_lab_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t4_keda
+  controller: keda
+  config: configs/industrial_iot_trace_small.yaml
+  overrides:
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: edge_cloud_tracebacked_v1
+      service_profile_set: industrial_iot_batch_lab_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t4_best_fit
+  controller: best_fit
+  config: configs/industrial_iot_trace_small.yaml
+  overrides:
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: edge_cloud_tracebacked_v1
+      service_profile_set: industrial_iot_batch_lab_v1
+- name: industrial_t4_round_robin
+  controller: round_robin
+  config: configs/industrial_iot_trace_small.yaml
+  overrides:
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: edge_cloud_tracebacked_v1
+      service_profile_set: industrial_iot_batch_lab_v1
+- name: industrial_t4_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/industrial_iot_trace_small.yaml
+  overrides: &id035
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: edge_cloud_tracebacked_v1
+      service_profile_set: industrial_iot_batch_lab_v1
+- name: industrial_t4_milp
+  controller: placement_only:milp
+  config: configs/industrial_iot_trace_small.yaml
+  overrides: *id035
+- name: industrial_t4_learned_stub
+  controller: learned_stub
+  config: configs/industrial_iot_trace_small.yaml
+  overrides: &id036
+    realism_tier: T4
+    calibration:
+      replace: true
+      network_profile: edge_cloud_tracebacked_v1
+      service_profile_set: industrial_iot_batch_lab_v1
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t4_rl_meta
+  controller: rl_meta
+  config: configs/industrial_iot_trace_small.yaml
+  overrides: *id036

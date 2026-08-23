@@ -1,0 +1,13 @@
+start_s,end_s,src,dst,bandwidth_mbps,latency_ms,contact_open
+0,12,IoT_0,Edge_0,95,7,1
+0,12,IoT_1,Edge_1,90,8,1
+0,12,IoT_2,Edge_0,88,9,1
+12,20,IoT_0,Edge_0,55,18,1
+12,20,IoT_1,Edge_1,42,24,1
+12,20,IoT_2,Edge_0,45,25,1
+20,32,IoT_0,Edge_1,82,10,1
+20,32,IoT_1,Edge_0,78,12,1
+20,32,IoT_2,Edge_1,70,14,1
+32,45,IoT_0,Edge_0,65,16,1
+32,45,IoT_1,Edge_1,60,18,1
+32,45,IoT_2,Edge_0,48,26,1

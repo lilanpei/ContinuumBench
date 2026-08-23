@@ -1,0 +1,49 @@
+scenario: split_inference
+realism_tier: T0
+epochs: 40
+step_seconds: 1.0
+
+scenario_config:
+  application_id: SplitInferenceSmall
+
+infrastructure:
+  infrastructure_id: split_inference_small_infra
+  n_space: 0
+  n_iot: 1
+  n_edge: 2
+  n_cloud: 1
+
+workload:
+  streams:
+    CameraSource:
+      generator: piecewise
+      segments:
+        - epochs: 15
+          rate: 2.0
+        - epochs: 10
+          rate: 4.0
+        - epochs: 15
+          rate: 2.5
+
+stages:
+  Sink:
+    deadline_s: 70.0
+
+scaling:
+  pools:
+    CloudRefine:
+      min_workers: 0
+      initial_workers: 1
+      max_workers: 2
+  queue_up_threshold: 10
+  queue_down_threshold: 2
+  age_up_threshold_s: 10
+  age_down_threshold_s: 3
+  ttl_pressure_up_threshold: 0.2
+  ttl_pressure_down_threshold: 0.05
+  cooldown_epochs: 1
+  scale_step: 1
+
+placement:
+  strategy: min_latency
+  place_every_epochs: 2

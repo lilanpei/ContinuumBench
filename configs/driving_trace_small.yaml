@@ -1,0 +1,57 @@
+scenario: driving_v2x
+realism_tier: T4
+epochs: 45
+step_seconds: 1.0
+
+scenario_config:
+  application_id: DrivingV2XTraceSmall
+
+infrastructure:
+  infrastructure_id: driving_trace_infra
+  n_space: 1
+  n_iot: 3
+  n_edge: 2
+  n_cloud: 1
+  contact_schedule:
+    mode: trace
+    path: src/continuum_bench/calibration/contact_traces/driving_v2x_small.csv
+    default_bandwidth_mbps: 0
+
+workload:
+  streams:
+    VehicleSource:
+      generator: piecewise
+      segments:
+        - epochs: 15
+          rate: 1.8
+        - epochs: 15
+          rate: 4.6
+        - epochs: 15
+          rate: 2.3
+
+stages:
+  Sink:
+    deadline_s: 90.0
+
+scaling:
+  pools:
+    Offload:
+      min_workers: 0
+      initial_workers: 1
+      max_workers: 3
+  queue_up_threshold: 10
+  queue_down_threshold: 3
+  age_up_threshold_s: 7
+  age_down_threshold_s: 2
+  ttl_pressure_up_threshold: 0.18
+  ttl_pressure_down_threshold: 0.05
+  cooldown_epochs: 1
+  scale_step: 1
+
+placement:
+  strategy: min_latency
+  place_every_epochs: 2
+
+calibration:
+  network_profile: vehicular_edge_cloud_tracebacked_v1
+  energy_profile: v2x_edge_iot_energy_v1

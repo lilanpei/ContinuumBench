@@ -1,0 +1,138 @@
+{
+  "_comment": "Frozen headline numbers underlying Table 1 + score robustness. Regenerate with the same command if the sweep/code legitimately changes. Pins values so code changes cannot silently shift the paper.",
+  "table1_cells": [
+    {
+      "scenario": "eo_dual_stream",
+      "realism_tier": "T0",
+      "controller": "hpa",
+      "completion_ratio": 0.5099,
+      "slo_violation_rate": 0.3388,
+      "latency_p95_s": 113.74
+    },
+    {
+      "scenario": "eo_dual_stream",
+      "realism_tier": "T0",
+      "controller": "placement_only:milp",
+      "completion_ratio": 0.2272,
+      "slo_violation_rate": 0.7509,
+      "latency_p95_s": 145.95
+    },
+    {
+      "scenario": "eo_dual_stream",
+      "realism_tier": "T4",
+      "controller": "hpa",
+      "completion_ratio": 0.5332,
+      "slo_violation_rate": 0.2945,
+      "latency_p95_s": 113.37
+    },
+    {
+      "scenario": "eo_dual_stream",
+      "realism_tier": "T4",
+      "controller": "best_fit",
+      "completion_ratio": 0.2223,
+      "slo_violation_rate": 0.7475,
+      "latency_p95_s": 133.65
+    },
+    {
+      "scenario": "driving_v2x",
+      "realism_tier": "T0",
+      "controller": "hpa",
+      "completion_ratio": 0.57,
+      "slo_violation_rate": 0.3527,
+      "latency_p95_s": 104.24
+    },
+    {
+      "scenario": "driving_v2x",
+      "realism_tier": "T0",
+      "controller": "placement_only:cost_greedy",
+      "completion_ratio": 0.4853,
+      "slo_violation_rate": 0.5011,
+      "latency_p95_s": 114.11
+    },
+    {
+      "scenario": "driving_v2x",
+      "realism_tier": "T4",
+      "controller": "hpa",
+      "completion_ratio": 0.6172,
+      "slo_violation_rate": 0.258,
+      "latency_p95_s": 103.29
+    },
+    {
+      "scenario": "driving_v2x",
+      "realism_tier": "T4",
+      "controller": "placement_only:cost_greedy",
+      "completion_ratio": 0.5294,
+      "slo_violation_rate": 0.4037,
+      "latency_p95_s": 110.01
+    },
+    {
+      "scenario": "split_inference",
+      "realism_tier": "T0",
+      "controller": "hpa",
+      "completion_ratio": 0.8626,
+      "slo_violation_rate": 0.1519,
+      "latency_p95_s": 72.83
+    },
+    {
+      "scenario": "split_inference",
+      "realism_tier": "T0",
+      "controller": "best_fit",
+      "completion_ratio": 0.5759,
+      "slo_violation_rate": 0.5389,
+      "latency_p95_s": 114.39
+    },
+    {
+      "scenario": "split_inference",
+      "realism_tier": "T4",
+      "controller": "hpa",
+      "completion_ratio": 1.0,
+      "slo_violation_rate": 0.0,
+      "latency_p95_s": 23.16
+    },
+    {
+      "scenario": "split_inference",
+      "realism_tier": "T4",
+      "controller": "best_fit",
+      "completion_ratio": 0.7551,
+      "slo_violation_rate": 0.333,
+      "latency_p95_s": 91.13
+    },
+    {
+      "scenario": "industrial_iot",
+      "realism_tier": "T0",
+      "controller": "hpa",
+      "completion_ratio": 0.9995,
+      "slo_violation_rate": 0.1771,
+      "latency_p95_s": 12.24
+    },
+    {
+      "scenario": "industrial_iot",
+      "realism_tier": "T0",
+      "controller": "placement_only:cost_greedy",
+      "completion_ratio": 1.0,
+      "slo_violation_rate": 0.627,
+      "latency_p95_s": 24.55
+    },
+    {
+      "scenario": "industrial_iot",
+      "realism_tier": "T4",
+      "controller": "hpa",
+      "completion_ratio": 1.0,
+      "slo_violation_rate": 0.0072,
+      "latency_p95_s": 8.81
+    },
+    {
+      "scenario": "industrial_iot",
+      "realism_tier": "T4",
+      "controller": "placement_only:cost_greedy",
+      "completion_ratio": 0.9677,
+      "slo_violation_rate": 0.7822,
+      "latency_p95_s": 54.61
+    }
+  ],
+  "score_sensitivity": {
+    "contexts_with_controller_choice_changes": 1,
+    "min_completion_delta": -0.000526315789473708,
+    "min_slo_reduction": 0.1398741544494807
+  }
+}

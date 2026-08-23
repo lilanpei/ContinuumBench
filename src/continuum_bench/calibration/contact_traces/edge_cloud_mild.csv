@@ -1,0 +1,9 @@
+start_s,end_s,src,dst,bandwidth_mbps,latency_ms,contact_open
+0,16,Edge_0,Cloud_0,950,20,1
+0,16,Edge_1,Cloud_0,820,24,1
+16,24,Edge_0,Cloud_0,520,45,1
+16,24,Edge_1,Cloud_0,460,55,1
+24,28,Edge_0,Cloud_0,220,80,1
+24,28,Edge_1,Cloud_0,210,85,1
+28,40,Edge_0,Cloud_0,760,30,1
+28,40,Edge_1,Cloud_0,640,38,1

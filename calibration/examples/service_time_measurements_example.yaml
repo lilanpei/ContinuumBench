@@ -1,0 +1,31 @@
+records:
+  - workload: split_inference_measured_lab
+    stage: encoder
+    node_class: device
+    distribution: deterministic
+    mean_ms: 19.6
+    p95_ms: 25.1
+    startup_ms: 138.0
+    migration_ms: 276.0
+    source: measured_jetson_lab_2026q2
+    notes: Device-side encoder timing from repeated warm-cache inference runs.
+  - workload: split_inference_measured_lab
+    stage: encoder
+    node_class: edge
+    distribution: deterministic
+    mean_ms: 8.2
+    p95_ms: 10.8
+    startup_ms: 95.0
+    migration_ms: 185.0
+    source: measured_edge_gpu_lab_2026q2
+    notes: Edge encoder timing collected under the same model checkpoint and batch size.
+  - workload: split_inference_measured_lab
+    stage: encoder
+    node_class: cloud
+    distribution: deterministic
+    mean_ms: 4.7
+    p95_ms: 6.3
+    startup_ms: 72.0
+    migration_ms: 149.0
+    source: measured_cloud_vm_lab_2026q2
+    notes: Cloud encoder timing for the calibrated profile set example.

@@ -1,0 +1,8 @@
+split: train
+entries:
+  - scenario: eo_dual_stream
+    family: earth_observation
+    config: configs/eo_small.yaml
+  - scenario: industrial_iot
+    family: industrial_iot
+    config: configs/industrial_iot_small.yaml

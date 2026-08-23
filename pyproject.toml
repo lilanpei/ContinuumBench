@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "continuum-bench"
+version = "1.0.0"
+description = "Reproducible continuum placement and autoscaling benchmarks with intermittent links"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Lilan Pei" }]
+keywords = [
+    "continuum computing",
+    "edge computing",
+    "benchmark",
+    "autoscaling",
+    "placement",
+    "simulation",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering",
+]
+# Reproducibility: the ContinuumBench paper experiments use eclypse 0.8.1 (commit 73806b7),
+# supplied as an external substrate via ECLYPSE_HOME (see README). It is intentionally kept
+# out of the hard dependencies below so the package install does not force a substrate version.
+dependencies = ["PyYAML>=6.0", "loguru>=0.7"]
+
+[project.optional-dependencies]
+milp = ["scipy>=1.11", "numpy>=1.24"]
+figures = ["matplotlib>=3.7", "numpy>=1.24"]
+dev = ["pytest>=8.0"]
+
+[project.urls]
+Homepage = "https://github.com/lilanpei/ContinuumBench"
+Repository = "https://github.com/lilanpei/ContinuumBench"
+Issues = "https://github.com/lilanpei/ContinuumBench/issues"
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+continuum_bench = ["calibration/*.yaml", "calibration/contact_traces/*.csv"]

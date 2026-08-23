@@ -1,0 +1,64 @@
+scenario: eo_dual_stream
+realism_tier: T0
+epochs: 40
+step_seconds: 1.0
+
+scenario_config:
+  application_id: EO_DualStreamSmall
+
+infrastructure:
+  infrastructure_id: eo_small_infra
+  n_space: 1
+  n_iot: 2
+  n_edge: 2
+  n_cloud: 1
+  contact_schedule:
+    mode: periodic
+    period_s: 20
+    on_duration_s: 6
+    up_bandwidth_mbps: 45
+    down_bandwidth_mbps: 0
+
+workload:
+  streams:
+    SpaceSource:
+      generator: piecewise
+      segments:
+        - epochs: 10
+          rate: 0.8
+        - epochs: 15
+          rate: 3.0
+        - epochs: 15
+          rate: 1.0
+    IoTSource:
+      generator: piecewise
+      segments:
+        - epochs: 20
+          rate: 2.0
+        - epochs: 10
+          rate: 4.0
+        - epochs: 10
+          rate: 1.5
+
+stages:
+  Sink:
+    deadline_s: 100.0
+
+scaling:
+  pools:
+    BulkPath:
+      min_workers: 0
+      initial_workers: 1
+      max_workers: 4
+  queue_up_threshold: 18
+  queue_down_threshold: 4
+  age_up_threshold_s: 18
+  age_down_threshold_s: 4
+  ttl_pressure_up_threshold: 0.25
+  ttl_pressure_down_threshold: 0.08
+  cooldown_epochs: 2
+  scale_step: 1
+
+placement:
+  strategy: min_latency
+  place_every_epochs: 2

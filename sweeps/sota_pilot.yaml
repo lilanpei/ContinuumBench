@@ -1,0 +1,367 @@
+name: sota_pilot
+config: configs/eo_small.yaml
+seeds:
+- 0
+- 1
+- 2
+overrides:
+  epochs: 80
+  drain_epochs: 40
+  workload:
+    repeat: true
+  infrastructure:
+    contact_schedule:
+      repeat: true
+runs:
+- name: eo_t0_joint
+  controller: separated_loops
+  config: configs/eo_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t0_hpa
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t0_keda
+  controller: keda
+  config: configs/eo_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t0_best_fit
+  controller: best_fit
+  config: configs/eo_small.yaml
+  overrides: {}
+- name: eo_t0_round_robin
+  controller: round_robin
+  config: configs/eo_small.yaml
+  overrides: {}
+- name: eo_t0_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/eo_small.yaml
+  overrides: {}
+- name: eo_t0_learned_stub
+  controller: learned_stub
+  config: configs/eo_small.yaml
+  overrides: &id001
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t0_rl_meta
+  controller: rl_meta
+  config: configs/eo_small.yaml
+  overrides: *id001
+- name: driving_t0_joint
+  controller: separated_loops
+  config: configs/driving_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t0_hpa
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t0_keda
+  controller: keda
+  config: configs/driving_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t0_best_fit
+  controller: best_fit
+  config: configs/driving_small.yaml
+  overrides: {}
+- name: driving_t0_round_robin
+  controller: round_robin
+  config: configs/driving_small.yaml
+  overrides: {}
+- name: driving_t0_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/driving_small.yaml
+  overrides: {}
+- name: driving_t0_learned_stub
+  controller: learned_stub
+  config: configs/driving_small.yaml
+  overrides: &id002
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t0_rl_meta
+  controller: rl_meta
+  config: configs/driving_small.yaml
+  overrides: *id002
+- name: split_t0_joint
+  controller: separated_loops
+  config: configs/split_inference_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t0_hpa
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t0_keda
+  controller: keda
+  config: configs/split_inference_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t0_best_fit
+  controller: best_fit
+  config: configs/split_inference_small.yaml
+  overrides: {}
+- name: split_t0_round_robin
+  controller: round_robin
+  config: configs/split_inference_small.yaml
+  overrides: {}
+- name: split_t0_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/split_inference_small.yaml
+  overrides: {}
+- name: split_t0_learned_stub
+  controller: learned_stub
+  config: configs/split_inference_small.yaml
+  overrides: &id003
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t0_rl_meta
+  controller: rl_meta
+  config: configs/split_inference_small.yaml
+  overrides: *id003
+- name: industrial_t0_joint
+  controller: separated_loops
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t0_hpa
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t0_keda
+  controller: keda
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t0_best_fit
+  controller: best_fit
+  config: configs/industrial_iot_small.yaml
+  overrides: {}
+- name: industrial_t0_round_robin
+  controller: round_robin
+  config: configs/industrial_iot_small.yaml
+  overrides: {}
+- name: industrial_t0_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/industrial_iot_small.yaml
+  overrides: {}
+- name: industrial_t0_learned_stub
+  controller: learned_stub
+  config: configs/industrial_iot_small.yaml
+  overrides: &id004
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t0_rl_meta
+  controller: rl_meta
+  config: configs/industrial_iot_small.yaml
+  overrides: *id004
+- name: eo_t4_joint
+  controller: separated_loops
+  config: configs/eo_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t4_hpa
+  controller: hpa
+  config: configs/eo_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t4_keda
+  controller: keda
+  config: configs/eo_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t4_best_fit
+  controller: best_fit
+  config: configs/eo_trace_small.yaml
+  overrides: {}
+- name: eo_t4_round_robin
+  controller: round_robin
+  config: configs/eo_trace_small.yaml
+  overrides: {}
+- name: eo_t4_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/eo_trace_small.yaml
+  overrides: {}
+- name: eo_t4_learned_stub
+  controller: learned_stub
+  config: configs/eo_trace_small.yaml
+  overrides: &id005
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_t4_rl_meta
+  controller: rl_meta
+  config: configs/eo_trace_small.yaml
+  overrides: *id005
+- name: driving_t4_joint
+  controller: separated_loops
+  config: configs/driving_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t4_hpa
+  controller: hpa
+  config: configs/driving_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t4_keda
+  controller: keda
+  config: configs/driving_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t4_best_fit
+  controller: best_fit
+  config: configs/driving_trace_small.yaml
+  overrides: {}
+- name: driving_t4_round_robin
+  controller: round_robin
+  config: configs/driving_trace_small.yaml
+  overrides: {}
+- name: driving_t4_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/driving_trace_small.yaml
+  overrides: {}
+- name: driving_t4_learned_stub
+  controller: learned_stub
+  config: configs/driving_trace_small.yaml
+  overrides: &id006
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: driving_t4_rl_meta
+  controller: rl_meta
+  config: configs/driving_trace_small.yaml
+  overrides: *id006
+- name: split_t4_joint
+  controller: separated_loops
+  config: configs/split_inference_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t4_hpa
+  controller: hpa
+  config: configs/split_inference_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t4_keda
+  controller: keda
+  config: configs/split_inference_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t4_best_fit
+  controller: best_fit
+  config: configs/split_inference_trace_small.yaml
+  overrides: {}
+- name: split_t4_round_robin
+  controller: round_robin
+  config: configs/split_inference_trace_small.yaml
+  overrides: {}
+- name: split_t4_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/split_inference_trace_small.yaml
+  overrides: {}
+- name: split_t4_learned_stub
+  controller: learned_stub
+  config: configs/split_inference_trace_small.yaml
+  overrides: &id007
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: split_t4_rl_meta
+  controller: rl_meta
+  config: configs/split_inference_trace_small.yaml
+  overrides: *id007
+- name: industrial_t4_joint
+  controller: separated_loops
+  config: configs/industrial_iot_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t4_hpa
+  controller: hpa
+  config: configs/industrial_iot_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t4_keda
+  controller: keda
+  config: configs/industrial_iot_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t4_best_fit
+  controller: best_fit
+  config: configs/industrial_iot_trace_small.yaml
+  overrides: {}
+- name: industrial_t4_round_robin
+  controller: round_robin
+  config: configs/industrial_iot_trace_small.yaml
+  overrides: {}
+- name: industrial_t4_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/industrial_iot_trace_small.yaml
+  overrides: {}
+- name: industrial_t4_learned_stub
+  controller: learned_stub
+  config: configs/industrial_iot_trace_small.yaml
+  overrides: &id008
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: industrial_t4_rl_meta
+  controller: rl_meta
+  config: configs/industrial_iot_trace_small.yaml
+  overrides: *id008

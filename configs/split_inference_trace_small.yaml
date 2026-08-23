@@ -1,0 +1,55 @@
+scenario: split_inference
+realism_tier: T4
+epochs: 40
+step_seconds: 1.0
+
+scenario_config:
+  application_id: SplitInferenceTraceSmall
+
+infrastructure:
+  infrastructure_id: split_inference_trace_infra
+  n_space: 0
+  n_iot: 1
+  n_edge: 2
+  n_cloud: 1
+
+workload:
+  streams:
+    CameraSource:
+      generator: piecewise
+      segments:
+        - epochs: 10
+          rate: 1.5
+        - epochs: 10
+          rate: 4.0
+        - epochs: 10
+          rate: 2.3
+        - epochs: 10
+          rate: 4.8
+
+stages:
+  Sink:
+    deadline_s: 70.0
+
+scaling:
+  pools:
+    CloudRefine:
+      min_workers: 0
+      initial_workers: 1
+      max_workers: 2
+  queue_up_threshold: 8
+  queue_down_threshold: 2
+  age_up_threshold_s: 6
+  age_down_threshold_s: 2
+  ttl_pressure_up_threshold: 0.15
+  ttl_pressure_down_threshold: 0.05
+  cooldown_epochs: 1
+  scale_step: 1
+
+placement:
+  strategy: min_latency
+  place_every_epochs: 2
+
+calibration:
+  network_profile: edge_cloud_tracebacked_v1
+  service_profile_set: split_inference_batch_lab_v1

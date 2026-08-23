@@ -1,0 +1,37 @@
+schema_version: 1
+kind: energy_profiles
+profiles:
+  v2x_edge_iot_energy_v1:
+    domain: driving_v2x
+    source: literature_calibrated_v2x_edge_iot_reference_v1
+    notes: Reference V2X edge/IoT/cloud energy profile for benchmark sensitivity studies; coefficients should be replaced by measured hardware profiles for deployment claims.
+    node_tiers:
+      iot:
+        idle_power_w: 1.8
+        dynamic_power_w_per_cpu: 0.9
+        dynamic_power_w_per_ram: 0.08
+        dynamic_power_w_per_storage: 0.002
+        battery_capacity_j: 1800000.0
+      edge:
+        idle_power_w: 45.0
+        dynamic_power_w_per_cpu: 5.5
+        dynamic_power_w_per_ram: 0.22
+        dynamic_power_w_per_storage: 0.004
+      cloud:
+        idle_power_w: 180.0
+        dynamic_power_w_per_cpu: 3.8
+        dynamic_power_w_per_ram: 0.12
+        dynamic_power_w_per_storage: 0.0015
+      space:
+        idle_power_w: 12.0
+        dynamic_power_w_per_cpu: 1.6
+        dynamic_power_w_per_ram: 0.12
+        dynamic_power_w_per_storage: 0.003
+        battery_capacity_j: 7200000.0
+    link_tiers:
+      iot_edge:
+        energy_j_per_byte: 0.00000022
+      edge_cloud:
+        energy_j_per_byte: 0.00000008
+      space_edge:
+        energy_j_per_byte: 0.00000055

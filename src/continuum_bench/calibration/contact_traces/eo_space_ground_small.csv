@@ -1,0 +1,7 @@
+start_s,end_s,src,dst,bandwidth_mbps,latency_ms,contact_open
+0,6,Space_0,Edge_0,28,230,1
+6,12,Space_0,Edge_0,0,230,0
+12,18,Space_0,Edge_1,18,260,1
+18,24,Space_0,Edge_1,0,260,0
+24,32,Space_0,Edge_0,34,210,1
+32,40,Space_0,Edge_0,0,230,0

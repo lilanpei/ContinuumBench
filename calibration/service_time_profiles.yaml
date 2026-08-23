@@ -1,0 +1,241 @@
+schema_version: 1
+kind: service_time_profiles
+description: Placeholder service-time profiles plus explicit emulated and measured-lab paper-rerun profile sets.
+profiles:
+  split_inference:
+    encoder:
+      device:
+        distribution: deterministic
+        mean_ms: 18.0
+        p95_ms: 24.0
+        startup_ms: 120.0
+        migration_ms: 250.0
+        source: placeholder
+        notes: Replace with device-class encoder measurements.
+      edge:
+        distribution: deterministic
+        mean_ms: 7.5
+        p95_ms: 10.0
+        startup_ms: 80.0
+        migration_ms: 180.0
+        source: placeholder
+        notes: Replace with edge-class encoder measurements.
+      cloud:
+        distribution: deterministic
+        mean_ms: 4.0
+        p95_ms: 5.5
+        startup_ms: 60.0
+        migration_ms: 140.0
+        source: placeholder
+        notes: Replace with cloud-class encoder measurements.
+  industrial_iot:
+    rules_engine:
+      edge:
+        distribution: deterministic
+        mean_ms: 6.0
+        p95_ms: 8.0
+        startup_ms: 50.0
+        migration_ms: 120.0
+        source: placeholder
+        notes: Replace with industrial IoT rules-engine measurements.
+      cloud:
+        distribution: deterministic
+        mean_ms: 3.5
+        p95_ms: 5.0
+        startup_ms: 40.0
+        migration_ms: 100.0
+        source: placeholder
+        notes: Replace with industrial IoT cloud measurements.
+  eo_pipeline:
+    tiler:
+      edge:
+        distribution: deterministic
+        mean_ms: 14.0
+        p95_ms: 20.0
+        startup_ms: 90.0
+        migration_ms: 210.0
+        source: placeholder
+        notes: Replace with EO tiling measurements on edge hardware.
+  split_inference_emulated_v1:
+    encoder:
+      device:
+        distribution: deterministic
+        mean_ms: 20.0
+        p95_ms: 26.0
+        startup_ms: 140.0
+        migration_ms: 280.0
+        source: emulated_split_inference_bench_v1
+        notes: Emulated device-class encoder profile used for calibrated reruns.
+      edge:
+        distribution: deterministic
+        mean_ms: 8.5
+        p95_ms: 11.0
+        startup_ms: 90.0
+        migration_ms: 190.0
+        source: emulated_split_inference_bench_v1
+        notes: Emulated edge-class encoder profile used for calibrated reruns.
+      cloud:
+        distribution: deterministic
+        mean_ms: 4.5
+        p95_ms: 6.0
+        startup_ms: 70.0
+        migration_ms: 150.0
+        source: emulated_split_inference_bench_v1
+        notes: Emulated cloud-class encoder profile used for calibrated reruns.
+  industrial_iot_emulated_v1:
+    rules_engine:
+      edge:
+        distribution: deterministic
+        mean_ms: 6.8
+        p95_ms: 8.8
+        startup_ms: 55.0
+        migration_ms: 130.0
+        source: emulated_industrial_iot_bench_v1
+        notes: Emulated edge rules-engine profile used for calibrated reruns.
+      cloud:
+        distribution: deterministic
+        mean_ms: 4.0
+        p95_ms: 5.6
+        startup_ms: 45.0
+        migration_ms: 110.0
+        source: emulated_industrial_iot_bench_v1
+        notes: Emulated cloud archive profile used for calibrated reruns.
+  split_inference_measured_lab_v1:
+    EdgePreprocess:
+      edge:
+        distribution: deterministic
+        mean_ms: 6.4
+        p95_ms: 8.1
+        startup_ms: 82.0
+        migration_ms: 175.0
+        source: measured_lab_split_inference_v1
+        notes: Measured-lab edge preprocessing timings from internal lab runs; not derived from public traces.
+    EdgeInference:
+      edge:
+        distribution: deterministic
+        mean_ms: 15.7
+        p95_ms: 19.8
+        startup_ms: 95.0
+        migration_ms: 210.0
+        source: measured_lab_split_inference_v1
+        notes: Measured-lab edge inference timings from internal lab runs; not derived from public traces.
+    CloudRefine:
+      cloud:
+        distribution: deterministic
+        mean_ms: 5.1
+        p95_ms: 6.6
+        startup_ms: 68.0
+        migration_ms: 145.0
+        source: measured_lab_split_inference_v1
+        notes: Measured-lab cloud refinement timings from internal lab runs; not derived from public traces.
+  split_inference_batch_lab_v1:
+    EdgePreprocess:
+      edge:
+        distribution: deterministic
+        mean_ms: 160.0
+        p95_ms: 202.5
+        startup_ms: 82.0
+        migration_ms: 175.0
+        source: measured_lab_split_inference_v1
+        notes: Task-normalized profile derived from measured-lab preprocessing timings for benchmark request granularity; not a per-frame latency.
+    EdgeInference:
+      edge:
+        distribution: deterministic
+        mean_ms: 300.0
+        p95_ms: 378.3
+        startup_ms: 95.0
+        migration_ms: 210.0
+        source: measured_lab_split_inference_v1
+        notes: Task-normalized profile derived from measured-lab inference timings for benchmark request granularity; not a per-frame latency.
+    CloudRefine:
+      cloud:
+        distribution: deterministic
+        mean_ms: 1020.0
+        p95_ms: 1320.0
+        startup_ms: 68.0
+        migration_ms: 145.0
+        source: measured_lab_split_inference_v1
+        notes: Task-normalized profile derived from measured-lab refinement timings for benchmark request granularity; stresses the elastic refinement pool.
+  industrial_iot_measured_lab_v1:
+    Filter:
+      edge:
+        distribution: deterministic
+        mean_ms: 3.9
+        p95_ms: 5.1
+        startup_ms: 48.0
+        migration_ms: 110.0
+        source: measured_lab_industrial_iot_v1
+        notes: Measured-lab filter timings from internal lab runs; not derived from public traces.
+    Aggregate:
+      edge:
+        distribution: deterministic
+        mean_ms: 4.8
+        p95_ms: 6.2
+        startup_ms: 52.0
+        migration_ms: 118.0
+        source: measured_lab_industrial_iot_v1
+        notes: Measured-lab aggregation timings from internal lab runs; not derived from public traces.
+    AnomalyDetect:
+      edge:
+        distribution: deterministic
+        mean_ms: 8.6
+        p95_ms: 10.9
+        startup_ms: 57.0
+        migration_ms: 126.0
+        source: measured_lab_industrial_iot_v1
+        notes: Measured-lab anomaly-detection timings from internal lab runs; not derived from public traces.
+    BulkArchive:
+      cloud:
+        distribution: deterministic
+        mean_ms: 4.2
+        p95_ms: 5.7
+        startup_ms: 46.0
+        migration_ms: 108.0
+        source: measured_lab_industrial_iot_v1
+        notes: Measured-lab bulk-archive timings from internal lab runs; not derived from public traces.
+  industrial_iot_batch_lab_v1:
+    Filter:
+      edge:
+        distribution: deterministic
+        mean_ms: 120.0
+        p95_ms: 156.9
+        startup_ms: 48.0
+        migration_ms: 110.0
+        source: measured_lab_industrial_iot_v1
+        notes: Task-normalized profile derived from measured-lab filter timings for benchmark window granularity.
+    Aggregate:
+      edge:
+        distribution: deterministic
+        mean_ms: 160.0
+        p95_ms: 206.7
+        startup_ms: 52.0
+        migration_ms: 118.0
+        source: measured_lab_industrial_iot_v1
+        notes: Task-normalized profile derived from measured-lab aggregation timings for benchmark window granularity.
+    AnomalyDetect:
+      edge:
+        distribution: deterministic
+        mean_ms: 240.0
+        p95_ms: 304.2
+        startup_ms: 57.0
+        migration_ms: 126.0
+        source: measured_lab_industrial_iot_v1
+        notes: Task-normalized profile derived from measured-lab anomaly-detection timings for benchmark window granularity.
+    ControlDispatch:
+      edge:
+        distribution: deterministic
+        mean_ms: 120.0
+        p95_ms: 152.1
+        startup_ms: 57.0
+        migration_ms: 126.0
+        source: measured_lab_industrial_iot_v1
+        notes: Task-normalized profile derived from measured-lab anomaly-detection timings for the control-dispatch stage.
+    BulkArchive:
+      cloud:
+        distribution: deterministic
+        mean_ms: 1000.0
+        p95_ms: 1357.1
+        startup_ms: 46.0
+        migration_ms: 108.0
+        source: measured_lab_industrial_iot_v1
+        notes: Task-normalized profile derived from measured-lab archive timings; stresses the elastic bulk-archive pool.

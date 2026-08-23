@@ -1,0 +1,49 @@
+scenario: industrial_iot
+realism_tier: T0
+epochs: 40
+step_seconds: 1.0
+
+scenario_config:
+  application_id: IndustrialIoTSmall
+
+infrastructure:
+  infrastructure_id: industrial_iot_small_infra
+  n_space: 0
+  n_iot: 2
+  n_edge: 2
+  n_cloud: 1
+
+workload:
+  streams:
+    SensorSource:
+      generator: piecewise
+      segments:
+        - epochs: 15
+          rate: 1.2
+        - epochs: 10
+          rate: 2.4
+        - epochs: 15
+          rate: 1.6
+
+stages:
+  Sink:
+    deadline_s: 10.0
+
+scaling:
+  pools:
+    BulkArchive:
+      min_workers: 0
+      initial_workers: 2
+      max_workers: 3
+  queue_up_threshold: 6
+  queue_down_threshold: 4
+  age_up_threshold_s: 4
+  age_down_threshold_s: 3
+  ttl_pressure_up_threshold: 0.2
+  ttl_pressure_down_threshold: 0.05
+  cooldown_epochs: 1
+  scale_step: 1
+
+placement:
+  strategy: min_latency
+  place_every_epochs: 2

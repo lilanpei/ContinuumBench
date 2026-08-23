@@ -1,0 +1,12 @@
+records:
+  - name: iot_edge_measured_lab
+    source_tier: iot
+    target_tier: edge
+    regime: stable_low_latency
+    median_rtt_ms: 11.8
+    p95_rtt_ms: 17.4
+    sustained_mbps: 82.5
+    degraded_mbps: 54.0
+    loss_percent: 0.2
+    source: measured_lab_campaign_2026q2
+    notes: Representative Wi-Fi lab capture for IoT-to-edge calibration.

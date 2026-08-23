@@ -1,0 +1,34 @@
+name: milp_reference
+config: configs/eo_trace_small.yaml
+seeds:
+- 0
+- 1
+- 2
+overrides:
+  epochs: 120
+  drain_epochs: 60
+  workload:
+    repeat: true
+  infrastructure:
+    contact_schedule:
+      repeat: true
+runs:
+- name: eo_f2_milp
+  controller: placement_only:milp
+  config: configs/eo_trace_small.yaml
+  overrides: {}
+- name: driving_f2_milp
+  controller: placement_only:milp
+  config: configs/driving_trace_small.yaml
+  overrides:
+    calibration:
+      replace: true
+      network_profile: vehicular_edge_cloud_tracebacked_v1
+- name: split_f2_milp
+  controller: placement_only:milp
+  config: configs/split_inference_trace_small.yaml
+  overrides: {}
+- name: industrial_f2_milp
+  controller: placement_only:milp
+  config: configs/industrial_iot_trace_small.yaml
+  overrides: {}

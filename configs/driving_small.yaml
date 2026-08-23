@@ -1,0 +1,55 @@
+scenario: driving_v2x
+realism_tier: T0
+epochs: 45
+step_seconds: 1.0
+
+scenario_config:
+  application_id: DrivingV2XSmall
+
+infrastructure:
+  infrastructure_id: driving_small_infra
+  n_space: 1
+  n_iot: 3
+  n_edge: 2
+  n_cloud: 1
+  contact_schedule:
+    mode: periodic
+    period_s: 16
+    on_duration_s: 5
+    up_bandwidth_mbps: 35
+    down_bandwidth_mbps: 0
+
+workload:
+  streams:
+    VehicleSource:
+      generator: piecewise
+      segments:
+        - epochs: 15
+          rate: 2.0
+        - epochs: 15
+          rate: 5.0
+        - epochs: 15
+          rate: 2.5
+
+stages:
+  Sink:
+    deadline_s: 90.0
+
+scaling:
+  pools:
+    Offload:
+      min_workers: 0
+      initial_workers: 1
+      max_workers: 3
+  queue_up_threshold: 12
+  queue_down_threshold: 3
+  age_up_threshold_s: 8
+  age_down_threshold_s: 2
+  ttl_pressure_up_threshold: 0.2
+  ttl_pressure_down_threshold: 0.05
+  cooldown_epochs: 1
+  scale_step: 1
+
+placement:
+  strategy: min_latency
+  place_every_epochs: 2

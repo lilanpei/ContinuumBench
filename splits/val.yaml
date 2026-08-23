@@ -1,0 +1,5 @@
+split: val
+entries:
+  - scenario: driving_v2x
+    family: mobility
+    config: configs/driving_small.yaml

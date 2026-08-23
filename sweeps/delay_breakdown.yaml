@@ -1,0 +1,56 @@
+name: delay_breakdown
+config: configs/eo_trace_small.yaml
+seeds:
+- 0
+- 1
+- 2
+overrides:
+  epochs: 120
+  drain_epochs: 60
+  workload:
+    repeat: true
+  infrastructure:
+    contact_schedule:
+      repeat: true
+runs:
+- name: eo_f2_hpa
+  controller: hpa
+  config: configs/eo_trace_small.yaml
+  overrides: &place_min_latency
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+- name: eo_f2_joint
+  controller: separated_loops
+  config: configs/eo_trace_small.yaml
+  overrides: *place_min_latency
+- name: driving_f2_hpa
+  controller: hpa
+  config: configs/driving_trace_small.yaml
+  overrides: &driving_f2_place_min_latency
+    placement:
+      strategy: min_latency
+      place_every_epochs: 2
+    calibration:
+      replace: true
+      network_profile: vehicular_edge_cloud_tracebacked_v1
+- name: driving_f2_joint
+  controller: separated_loops
+  config: configs/driving_trace_small.yaml
+  overrides: *driving_f2_place_min_latency
+- name: split_f2_hpa
+  controller: hpa
+  config: configs/split_inference_trace_small.yaml
+  overrides: *place_min_latency
+- name: split_f2_joint
+  controller: separated_loops
+  config: configs/split_inference_trace_small.yaml
+  overrides: *place_min_latency
+- name: industrial_f2_hpa
+  controller: hpa
+  config: configs/industrial_iot_trace_small.yaml
+  overrides: *place_min_latency
+- name: industrial_f2_joint
+  controller: separated_loops
+  config: configs/industrial_iot_trace_small.yaml
+  overrides: *place_min_latency
