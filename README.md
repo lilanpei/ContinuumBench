@@ -12,7 +12,7 @@
 
 <p align="center">
   <a href="https://scholar.google.it/citations?user=PnkoFQYAAAAJ&hl=en">Lanpei Li</a><sup>1,2</sup>,
-  <a href="https://orcid.org/0009-0004-0428-540X">Antonino Vaccarella</a><sup>1,2</sup>,
+  <a href="https://scholar.google.it/citations?user=L-L69K8AAAAJ&hl=en">Antonino Vaccarella</a><sup>1,2</sup>,
   <a href="https://scholar.google.it/citations?user=rQLINtQAAAAJ&hl=en">Vincenzo Lomonaco</a><sup>3</sup>,
   <a href="https://orcid.org/0000-0002-7937-4157">Massimo Coppola</a><sup>1</sup>
 </p>
