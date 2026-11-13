@@ -1,6 +1,29 @@
-# Continuum Bench
+<h1 align="center">ContinuumBench</h1>
 
-Continuum Bench is a public benchmark package for reproducible placement and autoscaling experiments across cloud-edge continuums with intermittent links.
+<p align="center">
+  <a href="https://arxiv.org/abs/2609.08946"><img src="https://img.shields.io/badge/arXiv-2609.08946-b31b1b.svg" alt="arXiv 2609.08946"></a>
+  <img src="https://img.shields.io/badge/FRAME%202026-Euro--Par%202026-4b44ce.svg" alt="FRAME 2026 at Euro-Par 2026">
+</p>
+
+<p align="center">
+  <a href="https://arxiv.org/abs/2611.10292"><img src="https://img.shields.io/badge/arXiv-2611.10292-b31b1b.svg" alt="arXiv 2611.10292"></a>
+  <img src="https://img.shields.io/badge/RISE--DL%202026-IoT%202026-4b44ce.svg" alt="RISE-DL 2026 at IoT 2026">
+</p>
+
+<p align="center">
+  <a href="https://scholar.google.it/citations?user=PnkoFQYAAAAJ&hl=en">Lanpei Li</a><sup>1,2</sup>,
+  <a href="https://orcid.org/0009-0004-0428-540X">Antonino Vaccarella</a><sup>1,2</sup>,
+  <a href="https://scholar.google.it/citations?user=rQLINtQAAAAJ&hl=en">Vincenzo Lomonaco</a><sup>3</sup>,
+  <a href="https://orcid.org/0000-0002-7937-4157">Massimo Coppola</a><sup>1</sup>
+</p>
+
+<p align="center">
+  <sup>1</sup>ISTI, National Research Council of Italy (CNR) &nbsp;&middot;&nbsp;
+  <sup>2</sup>University of Pisa &nbsp;&middot;&nbsp;
+  <sup>3</sup>Luiss Guido Carli University
+</p>
+
+ContinuumBench is a public benchmark package for reproducible placement and autoscaling experiments across cloud-edge continuums with intermittent links.
 
 It packages a focused benchmark core for joint placement, worker-pool scaling, intermittent-link transport, and store-and-forward behavior across cloud, edge, IoT, and space tiers.
 
@@ -10,8 +33,8 @@ ContinuumBench is Eclypse-native by default: application graphs, infrastructure 
 
 | Version | Where | Paper |
 |---|---|---|
-| 1.0 | branch `europar-frame-2026`, tag `v1.0-europar-frame` | ContinuumBench (FRAME 2026 at Euro-Par 2026) |
-| 1.1 | branch `main`, tag `v1.1.0` | Continual Instruction Tuning for LLM-based Management of Continuum Resources (RISE-DL 2026 at IoT 2026) |
+| 1.0 | branch `europar-frame-2026`, tag `v1.0-europar-frame` | [ContinuumBench: Benchmarking Joint Autoscaling and Placement Across Evaluation Regimes in the Cloud-Edge Continuum](https://arxiv.org/abs/2609.08946) (FRAME 2026 at Euro-Par 2026) |
+| 1.1 | branch `main`, tag `v1.1.0` | [Continual Instruction Tuning for LLM-based Management of Continuum Resources](https://arxiv.org/abs/2611.10292) (RISE-DL 2026 at IoT 2026) |
 
 Version 1.1 adds a knob interface through which an intent compiler sets the controller's parameters, three scenario variants, and the controllers they use. It also changes some simulator behavior and accounting (see [CHANGELOG.md](CHANGELOG.md)), so the ContinuumBench paper's results come from version 1.0. The intent compiler itself, its data and its trained adapters will be released in a companion repository, `continuum-intent-compiler`.
 
@@ -222,3 +245,36 @@ Each run directory includes:
 ## Public Scope
 
 This public benchmark repo contains the code, configurations, and analysis utilities required to run the benchmark scenarios, protocols, and baseline families.
+
+## Citation
+
+If you use ContinuumBench, please cite the ContinuumBench paper. If you use the knob interface or the scenario variants of version 1.1, please also cite the intent-compiler paper.
+
+```bibtex
+@inproceedings{li2026continuumbench,
+  title         = {{ContinuumBench}: Benchmarking Joint Autoscaling and Placement Across Evaluation Regimes in the Cloud-Edge Continuum},
+  author        = {Li, Lanpei and Vaccarella, Antonino and Lomonaco, Vincenzo and Coppola, Massimo},
+  booktitle     = {Euro-Par 2026: Parallel Processing Workshops (FRAME 2026)},
+  series        = {Lecture Notes in Computer Science},
+  publisher     = {Springer},
+  year          = {2026},
+  eprint        = {2609.08946},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.DC}
+}
+
+@inproceedings{li2026intentcompiler,
+  title         = {Continual Instruction Tuning for {LLM}-based Management of Continuum Resources},
+  author        = {Li, Lanpei and Vaccarella, Antonino and Lomonaco, Vincenzo and Coppola, Massimo},
+  booktitle     = {Companion Proceedings of the 16th International Conference on the Internet of Things (IoT 2026), RISE-DL 2026 Workshop},
+  publisher     = {ACM},
+  year          = {2026},
+  eprint        = {2611.10292},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.DC}
+}
+```
+
+## License
+
+The code is released under the MIT License (see [LICENSE](LICENSE)).
