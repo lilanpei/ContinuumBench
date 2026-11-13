@@ -8,6 +8,7 @@ This directory contains public benchmark configurations used for smoke runs, exa
 
 - `eo_small.yaml`, `driving_small.yaml`, `split_inference_small.yaml`, `industrial_iot_small.yaml`: small synthetic configs for single-run examples and smoke coverage.
 - `eo_trace_small.yaml`, `driving_trace_small.yaml`, `split_inference_trace_small.yaml`, `industrial_iot_trace_small.yaml`: public trace-backed variants for the same scenario families.
+- `eo_elastic_bottleneck.yaml`, `eo_placement_stress.yaml`, `eo_two_pool.yaml`: the scenario variants of the intent-compiler paper (version 1.1), each isolating one decision of the controller.
 - `README.md`: quick index for which config family to use and how configs relate to sweeps and splits.
 
 ## When To Read This
@@ -24,10 +25,14 @@ Files:
 - `driving_trace_small.yaml`: driving/V2X trace-backed experiment config.
 - `split_inference_trace_small.yaml`: split-inference trace-backed experiment config.
 - `industrial_iot_trace_small.yaml`: industrial IoT trace-backed experiment config.
+- `eo_elastic_bottleneck.yaml`: how many workers to run over time; one elastic pool is the only bottleneck under a peaky load (controllers `anticipatory`, `constant:N`).
+- `eo_placement_stress.yaml`: where stages run; tight CPU and a thin edge-cloud link make placement the limiting constraint (controller `placement_only:milp`).
+- `eo_two_pool.yaml`: how a shared core budget is split between the Fusion and BulkPath pools (controllers `anticipatory`, `constant:Fusion=a,BulkPath=b`).
 
 How to use:
 - Run a single config with `python -m continuum_bench.cli run --config <config> --controller <name> --seed <n> --out runs/`.
 - Use these configs directly in `splits/*.yaml` and `sweeps/*.yaml`.
+- To set the controller's parameters through the knob interface, add a `theta:` block to a config (see the README, "Knob Interface").
 
 Guidance:
 - These are experiment defaults, not exhaustive workload definitions.

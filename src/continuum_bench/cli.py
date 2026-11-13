@@ -26,7 +26,8 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "Controller name (separated_loops, static, round_robin, best_fit, "
             "all_local, all_edge, all_cloud, no_scaling, "
-            "hpa, keda, learned_stub, rl_meta, placement_only:<strategy>)"
+            "hpa, keda, learned_stub, rl_meta, placement_only:<strategy>, "
+            "anticipatory, constant[:N or :Pool=N,...])"
         ),
     )
     run_parser.add_argument("--seed", type=int, default=0, help="Deterministic run seed")

@@ -17,8 +17,10 @@ Files:
 - `placement_only.py`: fixed-placement controller family and extreme baselines
 - `separated_loops.py`: joint placement/autoscaling baseline with separate control loops
 - `autoscaling_baselines.py`: HPA-style and KEDA-style autoscaling baselines
-- `learned_stub.py`: the paper's **Feature-rule** baseline (a fixed policy over normalized features; no learning)
-- `rl_meta.py`: the paper's **Meta-rule** baseline (deterministic scale/replan/strategy rules; named `rl_meta` only for config/CSV compatibility, no learning)
+- `learned_stub.py`: the ContinuumBench paper's **Feature-rule** baseline (a fixed policy over normalized features; no learning)
+- `rl_meta.py`: the ContinuumBench paper's **Meta-rule** baseline (deterministic scale/replan/strategy rules; named `rl_meta` only for config/CSV compatibility, no learning)
+- `anticipatory.py`: autoscaler that pre-warms pools before known windows of load (version 1.1; used by the intent-compiler paper)
+- `constant.py`: reference controller that holds every pool, or each named pool, at a fixed size (version 1.1)
 - `extensions.py`: optional hook for loading a controller of your own without editing the runner
 
 Current controller families:
@@ -29,6 +31,7 @@ Current controller families:
 - HPA/KEDA-style autoscaling baselines that use benchmark queue signals and Eclypse-audited replanning
 - `learned_stub`, which observes `ControllerState`, emits normal `ControllerAction` objects, and leaves reward logging to the runner
 - `rl_meta`, which exposes a small policy action space: scale down/hold/up, replan or hold placement, and choose an Eclypse-audited placement strategy
+- `anticipatory` and `placement_only:milp`, whose parameters an intent compiler sets through the knob interface (`continuum_bench.theta`), and `constant`, a fixed-allocation reference
 
 Important distinction:
 - `placement_only.py` is mostly about where stages go

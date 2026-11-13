@@ -6,6 +6,15 @@ It packages a focused benchmark core for joint placement, worker-pool scaling, i
 
 ContinuumBench is Eclypse-native by default: application graphs, infrastructure graphs, placement views, structural path lookups, node availability views, route-cost timing, graph update policies, and native placement strategies are taken from Eclypse first. ContinuumBench adds benchmark protocol logic, workload queues, temporary contact reachability, controller policies, reliability and energy metrics, adaptive-controller interfaces, and cross-run analysis on top.
 
+## Versions
+
+| Version | Where | Paper |
+|---|---|---|
+| 1.0 | branch `main`, tag `v1.0-europar-frame` | ContinuumBench (FRAME 2026 at Euro-Par 2026) |
+| 1.1 | branch `continuum-intent-compiler`, tag `v1.1.0` | Continual Instruction Tuning for LLM-based Management of Continuum Resources (RISE-DL 2026 at IoT 2026) |
+
+Version 1.1 adds a knob interface through which an intent compiler sets the controller's parameters, three scenario variants, and the controllers they use. It also changes some simulator behavior and accounting (see [CHANGELOG.md](CHANGELOG.md)), so the ContinuumBench paper's results come from version 1.0. The intent compiler itself, its data and its trained adapters will be released in a companion repository, `continuum-intent-compiler`.
+
 ## Install
 
 This package requires Python 3.10+.
@@ -26,7 +35,7 @@ export ECLYPSE_HOME=/path/to/eclypse
 `PyYAML` and `loguru` are installed with this package; the `milp` extra adds `scipy`/`numpy`, the
 `figures` extra adds `matplotlib`, and the `dev` extra adds `pytest` for the test suite. `eclypse`
 is intentionally treated as an external substrate dependency. For an exact pin of the versions used for the committed results, `pip install -r
-requirements-lock.txt`. See **[REPRODUCE.md](REPRODUCE.md)** to regenerate the paper's tables and figures.
+requirements-lock.txt`. See **[REPRODUCE.md](REPRODUCE.md)** to regenerate the ContinuumBench paper's tables and figures.
 
 ## What This Repo Contains
 
@@ -80,6 +89,11 @@ Trace-backed variants are also provided:
 - `configs/split_inference_trace_small.yaml`
 - `configs/industrial_iot_trace_small.yaml`
 
+Scenario variants of the intent-compiler paper (version 1.1), each built on `eo_dual_stream`:
+- `configs/eo_elastic_bottleneck.yaml` (the paper's elastic variant): deciding how many workers to run over time; one elastic pool is the only bottleneck under a peaky load.
+- `configs/eo_placement_stress.yaml` (the placement variant): deciding where stages run; tight CPU and a thin edge-cloud link make placement the limiting constraint.
+- `configs/eo_two_pool.yaml` (the two-pool variant): deciding how a shared core budget is split between two worker pools.
+
 Contact-aware trace-backed configs use packaged contact windows under
 `src/continuum_bench/calibration/contact_traces/`. Calibration-only F2 configs
 can instead select documented network or service-time profiles without adding
@@ -104,14 +118,14 @@ Energy accounting and node failures are stressor overlays on those regimes, not 
 
 ## Controllers
 
-The paper's nine controller variants (CLI `--controller` keys), grouped by family. The paper renames
-two of them; the mapping is noted in **bold**.
+The ContinuumBench paper's nine controller variants (CLI `--controller` keys), grouped by family. The
+paper renames two of them; the mapping is noted in **bold**.
 
 Placement-only (choose ECLYPSE-audited placements, no scaling):
 - `round_robin`: distributes stages cyclically (Eclypse round-robin strategy, extended for benchmark anchor/resource cases).
 - `best_fit`: prefers feasible nodes with residual resources (Eclypse best-fit strategy).
 - `placement_only:cost_greedy`: greedy over compute and transfer-cost estimates.
-- `placement_only:milp`: solver-backed MILP reference over a reduced static snapshot with a linear latency objective (needs the `milp` extra: `pip install -e ".[milp]"`).
+- `placement_only:milp`: solver-backed MILP reference over a reduced static snapshot with a linear latency objective (needs the `milp` extra: `pip install -e ".[milp]"`). In version 1.1 it can instead take a weighted objective with tier price weights and hard constraints, set through the knob interface.
 
 Autoscaling (change worker counts, with ECLYPSE-audited placement replanning):
 - `hpa`: HPA-style queue-utilization autoscaler.
@@ -124,9 +138,32 @@ Rule-based baselines (deterministic, no learning):
 - `learned_stub`: the paper's **Feature-rule** controller (a fixed policy over normalized benchmark features).
 - `rl_meta`: the paper's **Meta-rule** controller (selects scale direction, replanning, and a placement strategy from a discrete action space).
 
+Added in version 1.1:
+- `anticipatory`: an autoscaler that pre-warms worker pools before known windows of load (contact windows or scheduled bursts) and scales them back between windows; the intent-compiler paper uses it on its elastic and two-pool variants.
+- `constant`, `constant:N` or `constant:Fusion=2,BulkPath=6`: a reference controller that holds every pool, or each named pool, at a fixed size (a bare `constant` holds the pool maximum).
+
 The registry also accepts extreme/extra placement baselines (`static`, `no_scaling`, `all_local`,
 `all_edge`, `all_cloud`) used in supporting sweeps. To add your own controller, see
 [`src/continuum_bench/controllers/README.md`](src/continuum_bench/controllers/README.md).
+
+## Knob Interface
+
+Version 1.1 lets an intent compiler set the controller's parameters once, as a vector `theta` of nineteen discrete knobs, instead of acting at every step. The schema [`src/continuum_bench/theta_schema.yaml`](src/continuum_bench/theta_schema.yaml) declares each knob's levels, its default and its consumers: the per-class deadlines of the runner; the scaling policy of the anticipatory autoscaler and the pool limits; and the placement policy, tier price weights and hard constraints of the MILP (`placement_only:milp`). The objective weights are recorded in `score.weights` for the intent's declared objective, which is computed outside the simulator from the run summary; the run's tier-priced cost uses the deployment's own `cost.price_per_tier`, not the price weights.
+
+`continuum_bench.theta.validate_theta` rejects a value outside its declared levels as invalid, and `apply_theta` projects a valid vector onto the configuration. A configuration that carries a `theta:` block is projected when the runner is built; every knob left out takes its default, and the projection overwrites the configuration's own values in the blocks it sets (per-class deadlines, anticipatory settings, pool caps and floors, MILP policy).
+
+```python
+from continuum_bench.runner import ContinuumBenchRunner, load_config
+from continuum_bench.theta import default_theta
+
+config = load_config("configs/eo_placement_stress.yaml")
+config["theta"] = {**default_theta(), "w_cost": 1.0, "tier_price_cloud": 4.0}
+runner = ContinuumBenchRunner(config=config, controller_name="placement_only:milp", seed=0, out_root="runs")
+summary = runner.run()["summary"]
+print(summary["qos"]["on_time_rate_by_priority"], summary["cost"]["worker_seconds_by_tier"])
+```
+
+A knob vector can be valid but infeasible for a deployment: when the MILP's hard constraints cannot be met, `placement_only:milp` raises a `ValueError` ("could not place active services").
 
 ## Eclypse Boundary
 
@@ -137,7 +174,9 @@ Epoch-level resource records expose both views:
 - `resources.active_runtime`: queue-weighted active runtime demand used by the benchmark loop.
 - the legacy top-level `resources.cpu`, `resources.ram`, `resources.storage`, and `resources.nodes` fields mirror `active_runtime` for backward-compatible analysis scripts.
 
-## Reproduce The Paper
+## Reproduce The ContinuumBench Paper
+
+Check out the tag `v1.0-europar-frame` first: version 1.1 changes some simulator behavior and accounting (see [CHANGELOG.md](CHANGELOG.md)). The intent-compiler paper will be reproduced from the companion repository `continuum-intent-compiler`.
 
 ```bash
 make smoke       # fast end-to-end check (sota_pilot, 3 seeds; minutes)
@@ -166,8 +205,9 @@ pytest tests -q
 
 The suite is deterministic and fast. ECLYPSE-only tests are skipped automatically when `eclypse` is
 not importable, so a clean checkout without the substrate reports `passed`/`skipped` rather than
-collection errors. `tests/test_golden_headline.py` pins the paper's headline numbers against
-`tests/golden/` when local run artifacts are present.
+collection errors. `tests/test_golden_headline.py` pins the ContinuumBench paper's headline numbers
+against `tests/golden/` when local run artifacts are present; produce those artifacts from the tag
+`v1.0-europar-frame`.
 
 ## Output Files
 
@@ -177,7 +217,7 @@ Each run directory includes:
 - `epochs.jsonl`: detailed epoch-level records.
 - `decision_trajectory.jsonl`: epoch-level state, action, outcome, and reward records.
 - `epochs.csv`: compact epoch-level metrics.
-- `summary.json`: aggregate metrics for latency, throughput, SLOs, resource utilization, energy, reliability, freshness, buffering, churn, migrations, and controller overhead. Reliability reports completed, failed, and pending work together with completed-or-failed accounting so low completion cannot masquerade as a good latency result.
+- `summary.json`: aggregate metrics for latency, throughput, SLOs, resource utilization, energy, reliability, freshness, buffering, churn, migrations, and controller overhead. Reliability reports completed, failed, and pending work together with completed-or-failed accounting so low completion cannot masquerade as a good latency result. With version 1.1, the summary also reports worker-seconds by tier and their tier-priced total, and the on-time rate of each task class.
 
 ## Public Scope
 

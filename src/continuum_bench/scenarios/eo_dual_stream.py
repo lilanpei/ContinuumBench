@@ -36,8 +36,14 @@ def build(config: Dict[str, Any], seed: int) -> ScenarioBuild:
         _required_layers_from_stage_profiles(stage_profiles),
     )
 
-    pool_cfg = config.get("scaling", {}).get("pools", {}).get("BulkPath", {})
+    pools_cfg = config.get("scaling", {}).get("pools", {})
+    pool_cfg = pools_cfg.get("BulkPath", {})
     max_workers = int(pool_cfg.get("max_workers", 4))
+    # Declaring a ``Fusion`` pool makes Fusion a second scalable pool that both sources
+    # balance-route across, so two pools compete for one node budget. Without the block the
+    # scenario is the single-pool scenario of version 1.0.
+    fusion_pool_cfg = pools_cfg.get("Fusion")
+    fusion_max_workers = int(fusion_pool_cfg.get("max_workers", 2)) if fusion_pool_cfg else 0
     built_stage_profiles: Dict[str, Dict[str, Any]] = {}
 
     app = _build_application(application_id=app_id)
@@ -55,7 +61,18 @@ def build(config: Dict[str, Any], seed: int) -> ScenarioBuild:
 
     space_source = add_stage("SpaceSource", SkeletonRole.SOURCE, stage_profiles["SpaceSource"])
     iot_source = add_stage("IoTSource", SkeletonRole.SOURCE, stage_profiles["IoTSource"])
-    fusion = add_stage("Fusion", SkeletonRole.TRANSFORM, stage_profiles["Fusion"])
+    fusion_workers: List[str] = []
+    if fusion_max_workers > 0:
+        for idx in range(fusion_max_workers):
+            worker_profile = _merge_dict(
+                stage_profiles["Fusion"],
+                {"worker_group": "Fusion", "worker_index": idx},
+            )
+            fusion_workers.append(
+                add_stage(f"Fusion_worker_{idx}", SkeletonRole.TRANSFORM, worker_profile)
+            )
+    else:
+        fusion = add_stage("Fusion", SkeletonRole.TRANSFORM, stage_profiles["Fusion"])
     triage = add_stage("Triage", SkeletonRole.TRANSFORM, stage_profiles["Triage"])
     fast_path = add_stage("FastPath", SkeletonRole.TRANSFORM, stage_profiles["FastPath"])
     sink = add_stage("Sink", SkeletonRole.SINK, stage_profiles["Sink"])
@@ -73,9 +90,11 @@ def build(config: Dict[str, Any], seed: int) -> ScenarioBuild:
         )
         bulk_workers.append(worker_id)
 
-    app.add_edge(space_source, fusion, strict=False, data_class="eo_space")
-    app.add_edge(iot_source, fusion, strict=False, data_class="eo_iot")
-    app.add_edge(fusion, triage, strict=False, data_class="fusion")
+    fusion_stages = fusion_workers or [fusion]
+    for fusion_stage in fusion_stages:
+        app.add_edge(space_source, fusion_stage, strict=False, data_class="eo_space")
+        app.add_edge(iot_source, fusion_stage, strict=False, data_class="eo_iot")
+        app.add_edge(fusion_stage, triage, strict=False, data_class="fusion")
     app.add_edge(triage, fast_path, strict=False, data_class="fast")
     app.add_edge(fast_path, sink, strict=False, data_class="result")
 
@@ -83,15 +102,24 @@ def build(config: Dict[str, Any], seed: int) -> ScenarioBuild:
         app.add_edge(triage, worker_id, strict=False, data_class="bulk")
         app.add_edge(worker_id, sink, strict=False, data_class="result")
 
+    if fusion_workers:
+        source_route = RouteSpec(mode="balance", balance_pool="Fusion")
+    else:
+        source_route = RouteSpec(mode="single", target=fusion)
     route_specs = {
-        space_source: RouteSpec(mode="single", target=fusion),
-        iot_source: RouteSpec(mode="single", target=fusion),
-        fusion: RouteSpec(mode="single", target=triage),
+        space_source: source_route,
+        iot_source: source_route,
         triage: RouteSpec(mode="triage", high_target=fast_path, low_pool="BulkPath"),
         fast_path: RouteSpec(mode="single", target=sink),
     }
+    for fusion_stage in fusion_stages:
+        route_specs[fusion_stage] = RouteSpec(mode="single", target=triage)
     for worker_id in bulk_workers:
         route_specs[worker_id] = RouteSpec(mode="single", target=sink)
+
+    worker_pools = {"BulkPath": bulk_workers}
+    if fusion_workers:
+        worker_pools["Fusion"] = fusion_workers
 
     return ScenarioBuild(
         name="eo_dual_stream",
@@ -102,7 +130,7 @@ def build(config: Dict[str, Any], seed: int) -> ScenarioBuild:
         source_stages=[space_source, iot_source],
         sink_stage=sink,
         route_specs=route_specs,
-        worker_pools={"BulkPath": bulk_workers},
+        worker_pools=worker_pools,
         source_stream_map={space_source: "SpaceSource", iot_source: "IoTSource"},
     )
 

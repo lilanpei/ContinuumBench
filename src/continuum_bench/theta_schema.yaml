@@ -1,0 +1,33 @@
+# Knob schema of the tactical controller.
+#
+# theta is the flat vector of knobs into which an operator's intent is translated. Every knob is
+# discrete: a value outside its declared levels is rejected as invalid. The key order below is
+# the canonical key order of theta in JSON.
+#
+# Consumers:
+#   score         objective weights, recorded as score.weights for the intent's declared
+#                 objective, which is computed outside the simulator
+#   runner        per-class deadlines (deadline_by_priority)
+#   anticipatory  autoscaling.anticipatory.* and the pool limits scaling.pools.*
+#   milp          placement.milp.* (objective weights, tier price weights, residency, hard caps)
+version: 0
+knobs:
+  w_cost:           {type: float, levels: [0.0, 0.25, 0.5, 1.0],      default: 0.0,  consumers: [score, milp]}
+  w_energy:         {type: float, levels: [0.0, 0.25, 0.5, 1.0],      default: 0.0,  consumers: [score, milp]}
+  w_p95:            {type: float, levels: [0.0, 0.01, 0.05],          default: 0.01, consumers: [score]}
+  w_mig:            {type: float, levels: [0.0, 0.001, 0.01],         default: 0.001, consumers: [score]}
+  deadline_high_s:  {type: float, levels: [5, 10, 20, 40, 100],       default: 40,   consumers: [runner]}
+  deadline_low_s:   {type: float, levels: [10, 20, 40, 100, 120],     default: 40,   consumers: [runner]}
+  scale_up_util:    {type: float, levels: [0.5, 0.7, 0.9, 1.2],       default: 0.7,  consumers: [anticipatory]}
+  prewarm_lead_s:   {type: float, levels: [0, 4, 8, 10, 14],          default: 10,   consumers: [anticipatory]}
+  drain_s:          {type: float, levels: [0, 5, 10, 18],             default: 18,   consumers: [anticipatory]}
+  prewarm_workers:  {type: int,   levels: [1, 2, 4, 6, 8],            default: 6,    consumers: [anticipatory]}
+  prewarm_fusion:   {type: int,   levels: [1, 2, 3, 4],               default: 2,    consumers: [anticipatory]}  # Fusion pool only (two-pool variant)
+  worker_cap:       {type: int,   levels: [1, 2, 4, 6, 8],            default: 8,    consumers: [anticipatory, milp]}
+  floor_fusion:     {type: int,   levels: [1, 2, 3, 4],               default: 1,    consumers: [anticipatory]}  # workers held between bursts in the Fusion pool
+  floor_bulk:       {type: int,   levels: [1, 2, 4, 6, 8],            default: 1,    consumers: [anticipatory]}  # workers held between bursts in every other pool
+  tier_price_cloud: {type: float, levels: [0.5, 1.0, 2.0, 4.0],       default: 1.0,  consumers: [milp]}  # weight of a cloud core in the MILP's cost term
+  tier_price_edge:  {type: float, levels: [0.5, 1.0, 2.0, 4.0],       default: 1.0,  consumers: [milp]}  # weight of an edge core in the MILP's cost term
+  residency:        {type: str,   levels: [any, edge_only, cloud_only, no_cloud], default: any, consumers: [milp]}
+  egress_budget_mb: {type: float, levels: [0, 1, 4, 16, .inf],        default: .inf, consumers: [milp]}
+  energy_cap_w:     {type: float, levels: [80, 120, 160, .inf],       default: .inf, consumers: [milp]}  # dynamic power, in W

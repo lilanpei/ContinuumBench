@@ -67,6 +67,11 @@ class StoreForwardBuffer:
         }
         self._current_size_bytes = 0
         self._total_items = 0
+        # Items this buffer destroyed (overflow-rejected, evicted, retry-exhausted, or
+        # TTL-expired). Retained so the runner can hold their tasks accountable in the
+        # SLO horizon; counting them only in aggregate would let a controller escape
+        # deadline accounting by discarding work.
+        self.discarded: List[BufferedItem] = []
         self.stats = {
             "items_buffered": 0,
             "items_transmitted": 0,
@@ -117,6 +122,7 @@ class StoreForwardBuffer:
 
         if self._total_items >= self.max_items or self._current_size_bytes + size_bytes > self.max_size_bytes:
             if not self._handle_overflow(size_bytes, priority):
+                self.discarded.append(item)
                 self.stats["items_dropped"] += 1
                 self.stats["bytes_dropped"] += size_bytes
                 self._priority_stats(priority)["items_dropped"] += 1
@@ -150,7 +156,12 @@ class StoreForwardBuffer:
             queue = self._queues[priority]
             while queue:
                 if max_bytes and bytes_retrieved + queue[0].size_bytes > max_bytes:
-                    break
+                    # Head-of-line unblocking: an item larger than the entire per-epoch
+                    # budget would fail this test in every epoch and stall forever. Release
+                    # it alone; the time it needs on the wire is carried by the transfer
+                    # delay. Items that fit are unaffected.
+                    if items or queue[0].size_bytes <= max_bytes:
+                        break
                 item = queue.popleft()
                 items.append(item)
                 bytes_retrieved += item.size_bytes
@@ -189,6 +200,7 @@ class StoreForwardBuffer:
 
         item.retries += 1
         if item.retries > item.max_retries:
+            self.discarded.append(item)
             self.stats["items_dropped"] += 1
             self.stats["bytes_dropped"] += item.size_bytes
             self._priority_stats(item.priority)["items_dropped"] += 1
@@ -219,6 +231,7 @@ class StoreForwardBuffer:
                     or self._current_size_bytes + needed_bytes > self.max_size_bytes
                 ):
                     dropped = queue.popleft()
+                    self.discarded.append(dropped)
                     self._current_size_bytes -= dropped.size_bytes
                     self._total_items -= 1
                     self.stats["items_dropped"] += 1
@@ -248,6 +261,7 @@ class StoreForwardBuffer:
 
             for item in queue:
                 if item.is_expired:
+                    self.discarded.append(item)
                     expired_count += 1
                     expired_bytes += item.size_bytes
                 else:

@@ -51,13 +51,18 @@ class _PlacementReplanMixin:
             if not new_services:
                 return None, False, False, scale_actions
             mapping = self._plan_placement(state, active_services)
-            if not mapping:
-                return None, False, True, []
-            frozen = {s: state.placement[s] for s in active_services if s in state.placement}
-            merged = {**mapping, **frozen}
-            if not mapping_fits_node_capacity(state, merged):
-                return None, False, True, []
-            return merged, True, False, scale_actions
+            if mapping:
+                frozen = {s: state.placement[s] for s in active_services if s in state.placement}
+                merged = {**mapping, **frozen}
+                if mapping_fits_node_capacity(state, merged):
+                    return merged, True, False, scale_actions
+            # The new workers do not fit around the frozen placement. Rather than defer the
+            # scale-up forever (a pool can stay stuck at its floor under a tight budget), fall
+            # back to one full re-solve, which may migrate existing workers.
+            full = self._plan_placement(state, active_services)
+            if full and mapping_fits_node_capacity(state, full):
+                return full, True, False, scale_actions
+            return None, False, True, []
 
         placement = self._plan_placement(state, active_services)
         if not placement:

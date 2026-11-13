@@ -7,6 +7,7 @@ ContinuumBench uses Eclypse as the substrate layer. Application and infrastructu
 Main entry points:
 - `cli.py`: command-line interface for single runs, summaries, and sweeps
 - `runner.py`: deterministic epoch-driven benchmark loop over Eclypse graphs and placements
+- `theta.py` and `theta_schema.yaml`: the knob interface through which an intent compiler sets the controller's parameters (version 1.1)
 
 Key subpackages:
 - `controllers/`: controller baselines, scaling interfaces, and adaptive-controller interfaces

@@ -5,7 +5,7 @@ import math
 from typing import Dict, List, Optional
 
 from continuum_bench.controllers.interfaces import ControllerAction, ControllerState
-from continuum_bench.controllers.placement_views import plan_placement
+from continuum_bench.controllers.placement_views import mapping_fits_node_capacity, plan_placement
 from continuum_bench.oracles import solve_small_instance
 from continuum_bench.placement import MinCTStrategy
 from continuum_bench.placement.strategies import (
@@ -20,6 +20,7 @@ from continuum_bench.placement.strategies import (
     _deployment_cost_score,
     _graph_node_attrs,
     _node_matches_layer,
+    _stage_output_volume_mb,
 )
 
 
@@ -38,6 +39,8 @@ class PlacementOnlyController:
     replan_every_epochs: int = 1
     static_mapping: Optional[Dict[str, str]] = None
     freeze_after_initial: bool = False
+
+    milp_fallbacks: int = 0
 
     def __post_init__(self):
         """Normalize the strategy key and instantiate the strategy."""
@@ -189,9 +192,19 @@ class PlacementOnlyController:
         state: ControllerState,
         active_services: List[str],
     ) -> Dict[str, str]:
-        """Place active services with the offline solver-backed reduced oracle."""
+        """Place active services with the offline solver-backed reduced oracle.
 
-        return milp_plan_placement(state, active_services)
+        The reduced model's demand figures are approximate; a mapping that over-subscribes a
+        node at runtime is replaced by the min-latency heuristic's (the autoscaler path defers
+        instead, which a placement-only controller cannot do at t = 0). Fallbacks are counted in
+        ``milp_fallbacks``.
+        """
+
+        mapping = milp_plan_placement(state, active_services)
+        if mapping and not mapping_fits_node_capacity(state, mapping):
+            self.milp_fallbacks += 1
+            return plan_placement(state, MinCTStrategy(), active_services)
+        return mapping
 
 
 def milp_plan_placement(
@@ -206,9 +219,11 @@ def milp_plan_placement(
     autoscaler can use a genuinely re-optimizing (migrating) planner rather than an order-stable heuristic.
     """
 
-    snapshot = _build_milp_snapshot(state, active_services)
+    spec = _milp_spec(state)
+    snapshot = _build_milp_snapshot(state, active_services, spec=spec)
+    objective = {"weights": dict(spec["weights"])} if spec.get("weights") else "latency"
     try:
-        result = solve_small_instance(snapshot, objective="latency", backend="milp")
+        result = solve_small_instance(snapshot, objective=objective, backend="milp")
     except ValueError as exc:
         if "allow at least one node" not in str(exc):
             raise
@@ -218,12 +233,41 @@ def milp_plan_placement(
     return dict(result.placement)
 
 
+# Tiers that host unanchored compute stages ("" = a node without a tier label).
+_COMPUTE_TIERS = {"edge", "cloud", ""}
+
+_RESIDENCY_FILTERS = {
+    "any": lambda layer: True,
+    "edge_only": lambda layer: layer == "edge",
+    "cloud_only": lambda layer: layer == "cloud",
+    "no_cloud": lambda layer: layer != "cloud",
+}
+
+
+def _milp_spec(state: ControllerState) -> Dict:
+    """Return the MILP placement policy (``placement.milp``, set through theta) from the state.
+
+    When it is absent, the oracle runs its pure-latency objective with no tier prices,
+    residency filter or hard caps.
+    """
+
+    spec = dict((state.metadata or {}).get("milp_objective") or {})
+    spec.setdefault("weights", {})
+    spec.setdefault("tier_prices", {})
+    spec.setdefault("residency", "any")
+    if str(spec["residency"]) not in _RESIDENCY_FILTERS:
+        raise ValueError(f"unknown residency policy: {spec['residency']!r}")
+    return spec
+
+
 def _build_milp_snapshot(
     state: ControllerState,
     active_services: List[str],
+    spec: Optional[Dict] = None,
 ) -> Dict[str, Dict]:
     """Build a reduced static placement snapshot for the MILP oracle."""
 
+    spec = spec if spec is not None else _milp_spec(state)
     active_set = set(active_services)
     residual_nodes = None
     placement_view = state.metadata.get("placement_view") if state.metadata else None
@@ -238,9 +282,25 @@ def _build_milp_snapshot(
         if service_id in state.application.nodes
     }
     nodes = {
-        str(node_id): _milp_node_attrs(attrs)
+        str(node_id): _milp_node_attrs(
+            attrs, tier_prices=spec.get("tier_prices", {}), cost_scale=float(spec.get("cost_scale", 1.0))
+        )
         for node_id, attrs in _graph_nodes_with_attrs(state.infrastructure)
     }
+    # Residency is a hard constraint on stages the scenario has not already anchored to a
+    # tier (sources and other layer-pinned stages keep their anchoring).
+    # Unanchored stages are placed on the continuum's compute tiers only. The source tiers
+    # (iot, space) host their anchored sources and carry a fixed price, so without this filter
+    # a cost-weighted MILP would move compute stages onto a 4-CPU device node.
+    residency_ok = _RESIDENCY_FILTERS[str(spec.get("residency", "any"))]
+    for service in services.values():
+        if service["placement_layers"]:
+            continue
+        service["allowed_nodes"] = [
+            node_id for node_id in service["allowed_nodes"]
+            if _single_layer(nodes[node_id]["placement_layers"]) in _COMPUTE_TIERS
+            and residency_ok(_single_layer(nodes[node_id]["placement_layers"]))
+        ]
     links = {
         (str(src), str(dst)): _milp_link_attrs(attrs)
         for src, dst, attrs in _graph_edges_with_attrs(state.infrastructure)
@@ -250,16 +310,31 @@ def _build_milp_snapshot(
             "source": str(src),
             "target": str(dst),
             "weight": float(attrs.get("weight", 1.0)) if isinstance(attrs, dict) else 1.0,
+            "volume_mb": _stage_output_volume_mb(state.application, str(src)),
         }
         for src, dst, attrs in _graph_edges_with_attrs(state.application)
         if src in active_set and dst in active_set
     ]
-    return {
+    snapshot = {
         "services": services,
         "nodes": nodes,
         "links": links,
         "flows": flows,
     }
+    constraints = {
+        key: float(spec[key])
+        for key in ("egress_budget_mb", "energy_cap_w")
+        if key in spec and spec[key] is not None
+    }
+    if constraints:
+        snapshot["constraints"] = constraints
+    return snapshot
+
+
+def _single_layer(layers: List[str]) -> str:
+    """Return a node's single tier label, or '' when it is not tier-anchored."""
+
+    return str(layers[0]).lower() if len(layers) == 1 else ""
 
 
 def _milp_service_attrs(
@@ -310,10 +385,18 @@ def _finite_milp_node_cost(value: float) -> float:
     return 1_000_000.0
 
 
-def _milp_node_attrs(attrs: Dict[str, object]) -> Dict[str, object]:
+def _milp_node_attrs(
+    attrs: Dict[str, object],
+    tier_prices: Optional[Dict[str, float]] = None,
+    cost_scale: float = 1.0,
+) -> Dict[str, object]:
     """Return node attributes understood by the reduced oracle."""
 
+    layers = list(attrs.get("placement_layers", []))
+    price = float((tier_prices or {}).get(_single_layer(layers), 1.0))
     return {
+        "price": price,
+        "cost_scale": float(cost_scale),
         "capacity": float(attrs.get("cpu", attrs.get("capacity", 0.0))),
         "cpu": float(attrs.get("cpu", attrs.get("capacity", 0.0))),
         "ram": float(attrs.get("ram", attrs.get("capacity", 0.0))),

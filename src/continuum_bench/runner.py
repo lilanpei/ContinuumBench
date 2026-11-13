@@ -22,6 +22,8 @@ from continuum_bench.controllers import (
     SeparatedLoopsController,
     WorkerPoolManager,
 )
+from continuum_bench.controllers.anticipatory import AnticipatoryContactController
+from continuum_bench.controllers.constant import ConstantController, parse_constant_target
 from continuum_bench.controllers.extensions import build_extension_controller
 from continuum_bench._eclypse import ensure_eclypse_on_path
 from continuum_bench.infra import (
@@ -133,6 +135,12 @@ class ContinuumBenchRunner:
     ):
         """Initialize a deterministic runner from benchmark configuration."""
 
+        if config.get("theta"):
+            # A run configuration that carries theta is projected once onto the configuration
+            # blocks that the controllers read (see continuum_bench.theta.apply_theta).
+            from continuum_bench.theta import apply_theta
+
+            config = apply_theta(config, config["theta"])
         self.config = config
         self.seed = int(seed)
         self.controller_name = controller_name
@@ -185,6 +193,10 @@ class ContinuumBenchRunner:
         self._node_failure_policy = NodeFailureAvailabilityUpdatePolicy()
         self._install_failure_update_policy()
         self._failure_failed_tasks_this_epoch = 0
+        # Tasks destroyed in transit by a node outage. Buffer losses are collected from
+        # each buffer's ``discarded`` list; both feed the SLO horizon so discarded work
+        # cannot escape deadline accounting.
+        self._failure_lost_tasks: List[Task] = []
 
         self.worker_pool_manager = WorkerPoolManager(
             application=self.application,
@@ -204,6 +216,13 @@ class ContinuumBenchRunner:
             time_fn=self.clock.now,
         )
         self.migration_delay_s = float(config.get("placement", {}).get("migration_delay_s", 0.0))
+        # Placement policy of the MILP planner, set through theta (empty: the default planner).
+        self._milp_objective_cfg = dict(config.get("placement", {}).get("milp", {}) or {})
+        # Per-class sink deadlines; a class absent here keeps the sink's deadline_s.
+        self._deadline_by_priority = {
+            str(priority): float(deadline_s)
+            for priority, deadline_s in (config.get("deadline_by_priority", {}) or {}).items()
+        }
 
         self.placement: Dict[str, str] = {}
         self._placement_adapter = EclypsePlacementAdapter(
@@ -242,6 +261,14 @@ class ContinuumBenchRunner:
             "cost_flat_price_per_worker_second": float(
                 self.config.get("cost", {}).get("flat_price_per_worker_second", 1.0)
             ),
+            # Tier-priced provisioning cost: the tier that hosts each active worker, in each
+            # epoch, is priced by cost.price_per_tier in the summary.
+            "cost_price_per_tier": {
+                str(tier): float(price)
+                for tier, price in (self.config.get("cost", {}).get("price_per_tier", {}) or {}).items()
+            },
+            "node_tiers": {str(node_id): self._node_layer(str(node_id)) for node_id in self.infrastructure.nodes},
+            "worker_pools": {stage: list(workers) for stage, workers in self.scenario.worker_pools.items()},
             "run_id": self.run_id,
             "run_dir": str(self.run_dir),
             "evaluation": evaluation,
@@ -661,6 +688,50 @@ class ContinuumBenchRunner:
                 static_mapping=config.get("static_mapping", {}),
             )
 
+        if name in {"anticipatory", "anticipatory_contact"}:
+            anticipatory_cfg = autoscaling_cfg.get("anticipatory", {})
+            contact_cfg = config.get("infrastructure", {}).get("contact_schedule", {})
+            startup_delays = [
+                float(p.get("startup_delay_s", 0.0))
+                for p in scaling_cfg.get("pools", {}).values()
+            ]
+            default_lead = (max(startup_delays) if startup_delays else 0.0) + 2.0
+            return AnticipatoryContactController(
+                placement_strategy=str(placement_cfg.get("strategy", "best_fit")),
+                replan_every_epochs=int(placement_cfg.get("place_every_epochs", 3)),
+                period_s=float(anticipatory_cfg.get("period_s", contact_cfg.get("period_s", 20.0))),
+                on_duration_s=float(
+                    anticipatory_cfg.get("on_duration_s", contact_cfg.get("on_duration_s", 4.0))
+                ),
+                start_offset_s=float(
+                    anticipatory_cfg.get("start_offset_s", contact_cfg.get("start_offset_s", 0.0))
+                ),
+                lead_s=float(anticipatory_cfg.get("lead_s", default_lead)),
+                drain_s=float(anticipatory_cfg.get("drain_s", 4.0)),
+                prewarm_workers=(
+                    int(anticipatory_cfg["prewarm_workers"])
+                    if "prewarm_workers" in anticipatory_cfg
+                    else None
+                ),
+                prewarm_by_pool={str(k): int(v) for k, v in (anticipatory_cfg.get("prewarm_by_pool", {}) or {}).items()},
+                min_replicas=int(anticipatory_cfg.get("min_replicas", 0)),
+                target_utilization=float(anticipatory_cfg.get("target_utilization", 0.7)),
+                tolerance=float(anticipatory_cfg.get("tolerance", 0.1)),
+                replan_on_scale=bool(placement_cfg.get("replan_on_scale", True)),
+                periodic_replan=bool(placement_cfg.get("periodic_replan", True)),
+            )
+
+        if name == "constant" or name.startswith("constant:"):
+            # ``constant:N`` pins N workers in every pool, ``constant:Fusion=2,BulkPath=6``
+            # pins pools separately, and a bare ``constant`` pins the pool maximum.
+            return ConstantController(
+                active_workers=parse_constant_target(name),
+                placement_strategy=str(placement_cfg.get("strategy", "best_fit")),
+                replan_every_epochs=int(placement_cfg.get("place_every_epochs", 3)),
+                replan_on_scale=bool(placement_cfg.get("replan_on_scale", True)),
+                periodic_replan=bool(placement_cfg.get("periodic_replan", True)),
+            )
+
         extension = build_extension_controller(name, config, self)
         if extension is not None:
             return extension
@@ -668,7 +739,7 @@ class ContinuumBenchRunner:
         raise ValueError(
             "controller must be one of: separated_loops, static, round_robin, best_fit, "
             "all_local, all_edge, all_cloud, no_scaling, hpa, keda, "
-            "learned_stub, rl_meta, placement_only:<strategy>"
+            "learned_stub, rl_meta, placement_only:<strategy>, anticipatory, constant[:N]"
         )
 
     def _build_workload_streams(self) -> Dict[str, WorkloadStream]:
@@ -764,6 +835,7 @@ class ContinuumBenchRunner:
                 "pool_oldest_age_s": pool_oldest_age_s,
                 "pool_ttl_pressure": pool_ttl_pressure,
                 "placement_planner": self._placement_adapter.plan_mapping,
+                "milp_objective": self._milp_objective_cfg,
             },
         )
 
@@ -826,6 +898,7 @@ class ContinuumBenchRunner:
             target_node = self.placement.get(message.target_stage)
             if target_node is not None and self._is_node_down(target_node):
                 self._failure_failed_tasks_this_epoch += 1
+                self._failure_lost_tasks.append(message.task)
                 continue
             self._add_task_delay(
                 message.task,
@@ -903,7 +976,14 @@ class ContinuumBenchRunner:
                         )
                         continue
 
-                    delay_epochs = self._latency_to_epochs(latency_ms)
+                    # Match the fresh-send path: size-aware route cost, so a buffered
+                    # item's transfer time scales with payload and link rate instead of
+                    # depending on latency alone.
+                    delay_epochs = (
+                        self._message_delay_epochs(stage_id, resolved_target_id, task, latency_ms)
+                        if isinstance(task, Task)
+                        else self._latency_to_epochs(latency_ms)
+                    )
                     if isinstance(task, Task):
                         task.transport_entered_time_s = epoch * self.step_seconds
                     self.inflight.append(
@@ -1002,7 +1082,7 @@ class ContinuumBenchRunner:
 
                 if stage_id == self.scenario.sink_stage:
                     latency_s = completion_time_s - task.created_time_s
-                    deadline_s = float(runtime.profile.get("deadline_s", runtime.profile.get("deadline", float("inf"))))
+                    deadline_s = self._deadline_for(task.priority, runtime.profile)
                     deadline_miss = latency_s > deadline_s
                     self._completed_sink_tasks.append(task.clone())
                     completions.append(
@@ -1025,10 +1105,8 @@ class ContinuumBenchRunner:
         """Count tasks whose SLO should have resolved by run end."""
 
         sink_runtime = self.stage_runtimes[self.scenario.sink_stage]
-        deadline_s = float(
-            sink_runtime.profile.get("deadline_s", sink_runtime.profile.get("deadline", float("inf")))
-        )
-        if deadline_s < 0 or math.isinf(deadline_s):
+        deadlines = [self._sink_deadline_s(sink_runtime.profile), *self._deadline_by_priority.values()]
+        if all(deadline_s < 0 or math.isinf(deadline_s) for deadline_s in deadlines):
             return {
                 "count": 0,
                 "by_priority": {},
@@ -1042,14 +1120,21 @@ class ContinuumBenchRunner:
         unfinished_violations_by_priority: Dict[str, int] = {}
 
         for task in self._completed_sink_tasks:
-            if task.created_time_s + deadline_s > run_end_time_s:
+            if task.created_time_s + self._deadline_for(task.priority, sink_runtime.profile) > run_end_time_s:
                 continue
             eligible_count += 1
             eligible_by_priority[task.priority] = eligible_by_priority.get(task.priority, 0) + 1
 
         seen_task_ids = set()
-        for task in self._horizon_unfinished_tasks():
-            if task.task_id in seen_task_ids or task.created_time_s + deadline_s > run_end_time_s:
+        # Work still in the system, plus work the run destroyed (buffer overflow, TTL
+        # expiry, retry exhaustion, node outage). Both are equally "not delivered on
+        # time": counting only the former let a controller improve its SLO rate by
+        # discarding tasks, since a discarded task left the queues/buffers/inflight
+        # sets and so was never eligible.
+        for task in self._horizon_unfinished_tasks() + self._horizon_lost_tasks():
+            if task.task_id in seen_task_ids:
+                continue
+            if task.created_time_s + self._deadline_for(task.priority, sink_runtime.profile) > run_end_time_s:
                 continue
             seen_task_ids.add(task.task_id)
             eligible_count += 1
@@ -1066,6 +1151,17 @@ class ContinuumBenchRunner:
             "unfinished_violations_by_priority": unfinished_violations_by_priority,
         }
 
+    @staticmethod
+    def _sink_deadline_s(profile: Dict[str, Any]) -> float:
+        """Return the sink stage's class-independent deadline (inf when undefined)."""
+
+        return float(profile.get("deadline_s", profile.get("deadline", float("inf"))))
+
+    def _deadline_for(self, priority: str, profile: Dict[str, Any]) -> float:
+        """Return the deadline for one task class: per-priority map first, then the sink's."""
+
+        return float(self._deadline_by_priority.get(str(priority), self._sink_deadline_s(profile)))
+
     def _horizon_unfinished_tasks(self) -> List[Task]:
         """Collect unfinished tasks from queues, buffers, and inflight links."""
 
@@ -1081,6 +1177,23 @@ class ContinuumBenchRunner:
                             tasks.append(task)
         for message in self.inflight:
             tasks.append(message.task)
+        return tasks
+
+    def _horizon_lost_tasks(self) -> List[Task]:
+        """Collect tasks the run destroyed rather than delivered.
+
+        Covers every buffer loss path (overflow rejection, eviction, retry exhaustion,
+        TTL expiry) plus tasks lost in transit to a node outage.
+        """
+
+        tasks: List[Task] = list(self._failure_lost_tasks)
+        for runtime in self.stage_runtimes.values():
+            for buffer in runtime.buffers.values():
+                for item in buffer.discarded:
+                    payload = item.data
+                    task = payload.get("task") if isinstance(payload, dict) else payload
+                    if isinstance(task, Task):
+                        tasks.append(task)
         return tasks
 
     def _route_task(self, stage_id: str, task: Task, epoch: int) -> None:
@@ -1130,7 +1243,13 @@ class ContinuumBenchRunner:
                 usage_key = (epoch, self._bandwidth_budget_key(src_stage, dst_stage))
                 bytes_sent = self._link_bytes_sent_this_epoch.get(usage_key, 0)
                 if bytes_sent + task.size_bytes > max_bytes:
-                    available = False
+                    # A message larger than one epoch's budget fails this test in every
+                    # epoch and stalls forever. Admit it alone on an otherwise idle link;
+                    # its serialization time is carried by the transfer delay below.
+                    if bytes_sent == 0 and task.size_bytes > max_bytes:
+                        self._link_bytes_sent_this_epoch[usage_key] = task.size_bytes
+                    else:
+                        available = False
                 else:
                     self._link_bytes_sent_this_epoch[usage_key] = bytes_sent + task.size_bytes
 

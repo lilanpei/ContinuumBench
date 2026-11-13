@@ -1,0 +1,114 @@
+# Two-pool variant of the Earth-observation dual-stream scenario.
+#
+# The decision is how a shared core budget is split between two pools. Fusion becomes a second
+# worker pool that both sources balance-route across, so the burst-facing Fusion pool and the
+# bulk BulkPath pool compete for the same edge and cloud CPU. Capacity is shrunk so that both
+# pools cannot run at their maximum: that allocation is rejected by the placement feasibility
+# check, and the best (Fusion, BulkPath) split depends on the workload.
+#
+# Budget: Fusion worker 4 CPU x 4 = 16, BulkPath worker 5 CPU x 8 = 40, Triage 3, FastPath 4,
+# Sink 1, so 64 CPU with both pools at their maximum, against 2 x 12 (edge) + 20 (cloud) = 44 CPU
+# of compute nodes. The space node, outside this budget, has room for one more pool worker.
+
+scenario: eo_dual_stream
+realism_tier: T0
+epochs: 240
+step_seconds: 1.0
+drain_epochs: 60
+
+scenario_config:
+  application_id: EO_TwoPool
+
+infrastructure:
+  infrastructure_id: eo_two_pool_infra
+  n_space: 1
+  n_iot: 2
+  n_edge: 2
+  n_cloud: 1
+  cloud:
+    cpu: 20.0
+    ram: 64.0
+    storage: 4000.0
+  edge:
+    cpu: 12.0
+    ram: 32.0
+    storage: 1000.0
+  intra_tier:
+    edge: {latency: 1.0, bandwidth: 10000.0}
+  contact_schedule:
+    mode: periodic
+    period_s: 20
+    on_duration_s: 20        # always open: the space link is not a bottleneck
+    up_bandwidth_mbps: 400
+    down_bandwidth_mbps: 0
+    repeat: true
+
+workload:
+  repeat: true
+  streams:
+    SpaceSource:               # steady bulk feed: at 1.0 task/s, BulkPath (0.4 task/s per
+      generator: piecewise     # worker) needs three workers
+      segments:
+        - epochs: 240
+          rate: 1.0
+    IoTSource:                 # sharp periodic burst hitting the Fusion pool first; the first burst
+      generator: piecewise     # comes after a 20 s idle lead so an anticipatory controller can pre-warm for it
+      segments:
+        - {epochs: 20,  rate: 0.0}
+        - {epochs: 5,   rate: 6.0}
+        - {epochs: 115, rate: 0.0}
+        - {epochs: 5,   rate: 6.0}
+        - {epochs: 95,  rate: 0.0}
+
+stages:
+  Fusion:    {processing_time_s: 0.7}    # per replica; k replicas multiply the aggregate rate
+  Triage:    {processing_time_s: 0.05}
+  FastPath:  {processing_time_s: 0.05}
+  SpaceSource: {priority_prob_high: 0.0}
+  IoTSource:   {priority_prob_high: 0.5} # half the burst is the high class (FastPath)
+  Sink:
+    processing_time_s: 0.05
+    deadline_s: 40.0
+
+deadline_by_priority:          # per-class deadlines
+  high: 10.0
+  low: 100.0
+
+scaling:
+  pools:
+    Fusion:
+      min_workers: 1
+      initial_workers: 1
+      max_workers: 4
+      startup_delay_s: 8.0
+    BulkPath:
+      min_workers: 1
+      initial_workers: 2
+      max_workers: 8
+      startup_delay_s: 8.0
+  queue_up_threshold: 8
+  queue_down_threshold: 2
+  age_up_threshold_s: 8
+  age_down_threshold_s: 2
+  ttl_pressure_up_threshold: 0.25
+  ttl_pressure_down_threshold: 0.08
+  cooldown_epochs: 1
+  scale_step: 2
+
+autoscaling:
+  anticipatory:
+    period_s: 120
+    on_duration_s: 5
+    start_offset_s: 20         # bursts at t = 20, 140
+    lead_s: 10
+    drain_s: 18
+    prewarm_workers: 4         # BulkPath (and any pool without an entry below)
+    prewarm_by_pool:
+      Fusion: 3
+    min_replicas: 1
+
+placement:
+  strategy: min_latency
+  place_every_epochs: 2
+  replan_on_scale: false     # a scale-up places only the new workers, and re-solves the whole
+                             # placement only when they do not fit; periodic replanning stays on

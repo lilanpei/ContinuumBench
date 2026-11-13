@@ -1,0 +1,95 @@
+# Placement-stress variant of the Earth-observation dual-stream scenario.
+#
+# The decision is where stages run. Three changes from configs/eo_small.yaml make placement the
+# limiting constraint:
+#   1. Tight cloud and edge CPU, so the compute stages cannot all fit on one tier.
+#   2. A thin, high-latency edge-cloud link, so shipping work to the cloud is costly.
+#   3. Large source frames and a tight sink deadline, so a far-cloud placement delivers late.
+# Capacity is held fixed (BulkPath min = initial = max = 4), so placement is the only decision.
+
+scenario: eo_dual_stream
+realism_tier: T0
+epochs: 60
+step_seconds: 1.0
+drain_epochs: 30
+
+scenario_config:
+  application_id: EO_PlacementStress
+
+infrastructure:
+  infrastructure_id: eo_stress_infra
+  n_space: 1
+  n_iot: 2
+  n_edge: 2
+  n_cloud: 1
+  cloud:
+    cpu: 24.0      # eo_small: 128
+    ram: 64.0
+    storage: 4000.0
+  edge:
+    cpu: 12.0      # per node (eo_small: 24); two edge nodes hold less than the stages need
+    ram: 32.0
+    storage: 1000.0
+  edge_to_cloud:
+    latency: 150.0   # eo_small: 20 ms
+    bandwidth: 40.0  # eo_small: 1000 Mbps; a 4 MB frame takes about 0.8 s per hop
+  contact_schedule:
+    mode: periodic
+    period_s: 20
+    on_duration_s: 6
+    up_bandwidth_mbps: 45
+    down_bandwidth_mbps: 0
+    repeat: true
+  # Same-tier nodes are directly reachable. This does not change the variant's limiting
+  # constraint, the thin edge-cloud link, which a lateral edge link does not relieve.
+  intra_tier:
+    edge: {latency: 1.0, bandwidth: 10000.0}
+
+workload:
+  repeat: true
+  streams:
+    SpaceSource:
+      generator: piecewise
+      segments:
+        - epochs: 10
+          rate: 0.6
+        - epochs: 25
+          rate: 1.2
+        - epochs: 25
+          rate: 0.8
+    IoTSource:
+      generator: piecewise
+      segments:
+        - epochs: 20
+          rate: 1.0
+        - epochs: 20
+          rate: 1.5
+        - epochs: 20
+          rate: 1.0
+
+stages:
+  SpaceSource:
+    output_size_bytes: 4000000   # eo_small: 800 KB; loads the thin edge-cloud link
+  IoTSource:
+    output_size_bytes: 1000000   # eo_small: 80 KB
+  Sink:
+    deadline_s: 12.0             # tight enough that a far-cloud placement misses it
+
+scaling:
+  pools:
+    BulkPath:
+      min_workers: 4            # capacity held fixed, so placement is the only decision
+      initial_workers: 4
+      max_workers: 4
+  queue_up_threshold: 18
+  queue_down_threshold: 4
+  age_up_threshold_s: 18
+  age_down_threshold_s: 4
+  ttl_pressure_up_threshold: 0.25
+  ttl_pressure_down_threshold: 0.08
+  cooldown_epochs: 2
+  scale_step: 1
+
+placement:
+  strategy: min_latency
+  place_every_epochs: 2

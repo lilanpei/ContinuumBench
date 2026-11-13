@@ -255,6 +255,7 @@ def summarize_epochs(metadata: Dict[str, Any], epoch_records: List[Dict[str, Any
         "total_provisioned_worker_seconds": sum(active_sums) * step_seconds * flat_price,
         "mean_active_workers": sum(active_sums) / len(active_sums) if active_sums else 0.0,
         "flat_price_per_worker_second": flat_price,
+        **_tier_priced_cost(metadata, epoch_records, step_seconds),
     }
 
     drops = int(cumulative.get("items_dropped", 0))
@@ -293,6 +294,7 @@ def summarize_epochs(metadata: Dict[str, Any], epoch_records: List[Dict[str, Any
             "deadline_miss_rate": (deadline_miss_count / throughput_count) if throughput_count > 0 else 0.0,
             "slo_violation_rate": (slo_violation_count / slo_eligible_count) if slo_eligible_count > 0 else 0.0,
             "per_priority": qos_per_priority,
+            "on_time_rate_by_priority": _on_time_rates(qos_per_priority),
         },
         "traffic": {
             "cross_tier_bytes_total": cross_tier_bytes_total,
@@ -405,6 +407,49 @@ def summarize_epochs(metadata: Dict[str, Any], epoch_records: List[Dict[str, Any
             },
         },
     }
+
+
+def _tier_priced_cost(
+    metadata: Dict[str, Any],
+    epoch_records: List[Dict[str, Any]],
+    step_seconds: float,
+) -> Dict[str, Any]:
+    """Worker-seconds by hosting tier and their tier-priced total.
+
+    Uses the per-epoch placement of each pool's workers (only active workers are placed) and
+    the run's node->tier map. Tiers without a configured price cost the flat price; runs
+    without the metadata (older runs) report empty tier blocks and a total of 0.
+    """
+
+    node_tiers = dict(metadata.get("node_tiers", {}) or {})
+    worker_pools = dict(metadata.get("worker_pools", {}) or {})
+    prices = {str(k): float(v) for k, v in (metadata.get("cost_price_per_tier", {}) or {}).items()}
+    flat_price = float(metadata.get("cost_flat_price_per_worker_second", _DEFAULT_FLAT_PRICE))
+    workers = {worker_id for pool in worker_pools.values() for worker_id in pool}
+    seconds_by_tier: Dict[str, float] = {}
+    if node_tiers and workers:
+        for record in epoch_records:
+            for service_id, node_id in (record.get("placement", {}) or {}).items():
+                if service_id in workers:
+                    tier = str(node_tiers.get(str(node_id), "")) or "unknown"
+                    seconds_by_tier[tier] = seconds_by_tier.get(tier, 0.0) + step_seconds
+    total = sum(seconds * prices.get(tier, flat_price) for tier, seconds in seconds_by_tier.items())
+    return {
+        "worker_seconds_by_tier": seconds_by_tier,
+        "price_per_tier": prices,
+        "total_tier_priced_worker_seconds": total,
+    }
+
+
+def _on_time_rates(per_priority: Dict[str, Dict[str, int]]) -> Dict[str, float]:
+    """Per-class on-time rate over SLO-eligible work, under per-class deadlines."""
+
+    out: Dict[str, float] = {}
+    for priority, stats in per_priority.items():
+        eligible = int(stats.get("slo_eligible_count", 0))
+        violations = int(stats.get("slo_violation_count", 0))
+        out[priority] = (max(0, eligible - violations) / eligible) if eligible > 0 else 0.0
+    return out
 
 
 def _mean(values: Iterable[float]) -> float:

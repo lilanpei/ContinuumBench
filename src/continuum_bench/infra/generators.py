@@ -230,6 +230,29 @@ def build_extended_continuum(config: Dict[str, Any], seed: int) -> Infrastructur
             infra.add_edge(space_id, edge_id, symmetric=True, strict=False, **space_edge)
             contact_edges.append((space_id, edge_id))
 
+    # Optional intra-tier connectivity. Without it, same-tier nodes are only reachable
+    # through the tier above -- two edge nodes talk via the cloud, so spreading stages
+    # across the edge tier costs two WAN crossings and "keep work local" is penalized
+    # rather than rewarded. Off by default: enabling it changes path lengths, and so
+    # results, for every existing scenario.
+    #
+    #   infrastructure:
+    #     intra_tier:
+    #       edge: {latency: 1.0, bandwidth: 10000.0}
+    intra_tier_cfg = config.get("intra_tier", {}) or {}
+    tier_nodes = {"cloud": cloud_nodes, "edge": edge_nodes, "iot": iot_nodes, "space": space_nodes}
+    for tier, link_cfg in intra_tier_cfg.items():
+        nodes = tier_nodes.get(str(tier).lower(), [])
+        if not link_cfg or len(nodes) < 2:
+            continue
+        link = _resolve_link_profile(
+            dict(link_cfg), {"latency": 1.0, "bandwidth": 10_000.0},
+            network_profile, energy_profile, str(tier), str(tier),
+        )
+        for i, src in enumerate(nodes):
+            for dst in nodes[i + 1:]:
+                infra.add_edge(src, dst, symmetric=True, strict=False, **link)
+
     return InfrastructureBundle(infrastructure=infra, contact_edges=contact_edges)
 
 

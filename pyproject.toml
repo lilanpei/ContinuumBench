@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "continuum-bench"
-version = "1.0.0"
+version = "1.1.0"
 description = "Reproducible continuum placement and autoscaling benchmarks with intermittent links"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -50,4 +50,4 @@ Issues = "https://github.com/lilanpei/ContinuumBench/issues"
 where = ["src"]
 
 [tool.setuptools.package-data]
-continuum_bench = ["calibration/*.yaml", "calibration/contact_traces/*.csv"]
+continuum_bench = ["theta_schema.yaml", "calibration/*.yaml", "calibration/contact_traces/*.csv"]

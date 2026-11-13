@@ -46,3 +46,27 @@ def test_empty_branch_echoes_configured_flat_price():
     out = summarize_epochs({"step_seconds": 1.0, "cost_flat_price_per_worker_second": 0.5}, [])
     # Empty branch must echo the configured price, matching the populated branch.
     assert out["cost"]["flat_price_per_worker_second"] == 0.5
+
+
+def test_tier_priced_cost_uses_worker_placement_and_tier_prices():
+    """Worker-seconds are priced by the tier that hosts each active worker."""
+
+    meta = {
+        "step_seconds": 1.0,
+        "cost_flat_price_per_worker_second": 1.0,
+        "cost_price_per_tier": {"edge": 4.0, "cloud": 0.5},
+        "node_tiers": {"Edge_0": "edge", "Cloud_0": "cloud", "IoT_0": "iot"},
+        "worker_pools": {"BulkPath": ["w0", "w1"]},
+    }
+    rec = _epoch({"BulkPath": 2})
+    rec["placement"] = {"w0": "Edge_0", "w1": "Cloud_0", "Sink": "IoT_0"}  # Sink is not a worker
+    out = summarize_epochs(meta, [rec, rec])
+    assert out["cost"]["worker_seconds_by_tier"] == {"edge": 2.0, "cloud": 2.0}
+    assert out["cost"]["total_tier_priced_worker_seconds"] == 2 * 4.0 + 2 * 0.5
+    assert out["cost"]["total_provisioned_worker_seconds"] == 4.0  # flat accounting unchanged
+
+
+def test_tier_priced_cost_is_empty_without_run_metadata():
+    out = summarize_epochs({"step_seconds": 1.0}, [_epoch({"A": 2})])
+    assert out["cost"]["worker_seconds_by_tier"] == {}
+    assert out["cost"]["total_tier_priced_worker_seconds"] == 0.0

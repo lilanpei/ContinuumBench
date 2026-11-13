@@ -1,0 +1,47 @@
+cff-version: 1.2.0
+message: "If you use ContinuumBench, please cite the ContinuumBench paper. If you use the knob interface or the intent-compiler scenario variants (version 1.1), please also cite the intent-compiler paper."
+title: "ContinuumBench"
+type: software
+version: 1.1.0
+date-released: 2026-11-13
+license: MIT
+repository-code: "https://github.com/lilanpei/ContinuumBench"
+authors:
+  - family-names: Li
+    given-names: Lanpei
+preferred-citation:
+  type: conference-paper
+  title: "ContinuumBench: Benchmarking Joint Autoscaling and Placement Across Evaluation Regimes in the Cloud-Edge Continuum"
+  authors:
+    - family-names: Li
+      given-names: Lanpei
+    - family-names: Vaccarella
+      given-names: Antonino
+    - family-names: Lomonaco
+      given-names: Vincenzo
+    - family-names: Coppola
+      given-names: Massimo
+  collection-title: "Euro-Par 2026: Parallel Processing Workshops (6th Workshop on Flexible Resource and Application Management on the Edge, FRAME 2026)"
+  publisher:
+    name: Springer
+  year: 2026
+  notes: "Lecture Notes in Computer Science, to appear. Preprint: arXiv:2609.08946"
+  url: "https://arxiv.org/abs/2609.08946"
+references:
+  - type: conference-paper
+    title: "Continual Instruction Tuning for LLM-based Management of Continuum Resources"
+    authors:
+      - family-names: Li
+        given-names: Lanpei
+      - family-names: Vaccarella
+        given-names: Antonino
+      - family-names: Lomonaco
+        given-names: Vincenzo
+      - family-names: Coppola
+        given-names: Massimo
+    collection-title: "Companion Proceedings of the 16th International Conference on the Internet of Things (IoT 2026), Workshop on Research and Innovation in Scalable and Efficient Deep Learning (RISE-DL 2026)"
+    publisher:
+      name: ACM
+    year: 2026
+    doi: "10.1145/3860552.3860597"
+    url: "https://arxiv.org/abs/2611.10292"

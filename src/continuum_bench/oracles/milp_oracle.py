@@ -1,10 +1,14 @@
 """Solver-backed MILP placement oracle.
 
-The paper evaluation uses this oracle only as a placement reference: the placement-only ``milp``
-controller invokes it with ``objective="latency"`` and the MILP backend (SciPy/HiGHS) plus a
-no-good-cut feasibility audit against ECLYPSE. The additional energy and reliability objective
-terms and the enumeration backend are auxiliary capabilities exercised by the unit tests but are
-not used to produce any paper result.
+The ContinuumBench paper uses this oracle only as a placement reference: the placement-only
+``milp`` controller invokes it with ``objective="latency"`` and the MILP backend (SciPy/HiGHS)
+plus a no-good-cut feasibility audit against ECLYPSE. The energy and reliability objective terms
+and the enumeration backend are auxiliary capabilities exercised by the unit tests.
+
+Knob interface (``continuum_bench.theta``), used by the intent-compiler paper: a snapshot may also
+carry a per-node ``price`` (tier price), per-flow ``volume_mb`` and a ``constraints`` block
+(``egress_budget_mb``, ``energy_cap_w``). The weighted objective then accepts a ``cost``
+component (price x CPU demand), and both backends enforce the hard constraints.
 """
 
 from __future__ import annotations
@@ -101,6 +105,8 @@ def _solve_with_enumeration(
     best_result: OracleResult | None = None
     for assignment in product(*candidates_per_service):
         placement = dict(zip(service_ids, assignment, strict=True))
+        if not _satisfies_constraints(snapshot, placement):
+            continue
         if not _is_feasible(model, snapshot, placement):
             continue
 
@@ -151,7 +157,7 @@ def _solve_with_milp(
     ]
     if unsupported:
         raise RuntimeError(
-            "MILP backend supports latency and energy objectives; "
+            "MILP backend supports latency, energy and cost objectives; "
             f"{unsupported[0]} uses enumeration"
         )
     services = snapshot["services"]
@@ -216,7 +222,7 @@ def _solve_with_milp(
             return OracleResult({}, inf, _milp_status(result), _milp_gap(result), "milp_scipy_highs")
 
         placement = _placement_from_milp_solution(result.x, service_ids, candidates, x_index)
-        if _is_feasible(model, snapshot, placement):
+        if _satisfies_constraints(snapshot, placement) and _is_feasible(model, snapshot, placement):
             return OracleResult(
                 placement=placement,
                 objective_value=float(_evaluate_objective(model, snapshot, placement, objective)),
@@ -348,7 +354,7 @@ def _milp_objective_weights(objective: ObjectiveSpec) -> dict[str, float]:
         weights = objective.get("weights", {})
         if not isinstance(weights, Mapping) or not weights:
             raise ValueError("weighted objective must define a non-empty 'weights' mapping")
-        supported = {"latency", "energy", "resource_overcommit", "failure_risk"}
+        supported = {"latency", "energy", "cost", "resource_overcommit", "failure_risk"}
         unknown = set(str(name) for name in weights) - supported
         if unknown:
             raise ValueError(f"unsupported weighted objective component: {sorted(unknown)[0]}")
@@ -396,6 +402,7 @@ def _fill_milp_objective(
 
     latency_weight = float(weights.get("latency", 0.0))
     energy_weight = float(weights.get("energy", 0.0))
+    cost_weight = float(weights.get("cost", 0.0))
 
     for (service_id, node_id), idx in x_index.items():
         service = snapshot["services"][service_id]
@@ -404,6 +411,8 @@ def _fill_milp_objective(
             c[idx] += latency_weight * float(service.get("node_costs", {}).get(node_id, 0.0))
         if energy_weight:
             c[idx] += energy_weight * _assignment_energy(service, node)
+        if cost_weight:
+            c[idx] += cost_weight * _assignment_cost(service, node)
     if latency_weight:
         for flow_idx, flow in enumerate(snapshot.get("flows", [])):
             flow_weight = float(flow.get("weight", 1.0))
@@ -417,14 +426,62 @@ def _fill_milp_objective(
 
 
 def _assignment_energy(service: Mapping[str, Any], node: Mapping[str, Any]) -> float:
-    """Return the linear energy contribution for one service-node assignment."""
+    """Return the linear (dynamic-power) energy contribution for one service-node assignment.
+
+    Idle power is excluded for the reason given in ``_energy_objective``: it does not depend on
+    the placement, and adding it per assignment made every finite energy cap infeasible.
+    """
 
     demand = float(service.get("demand", service.get("cpu", 0.0)))
-    total = float(node.get("idle_power_w", 0.0))
-    total += float(node.get("dynamic_power_w_per_cpu", 0.0)) * demand
+    total = float(node.get("dynamic_power_w_per_cpu", 0.0)) * demand
     total += float(node.get("dynamic_power_w_per_ram", 0.0)) * float(service.get("ram", 0.0))
     total += float(node.get("dynamic_power_w_per_storage", 0.0)) * float(service.get("storage", 0.0))
     return total
+
+
+def _assignment_cost(service: Mapping[str, Any], node: Mapping[str, Any]) -> float:
+    """Return the tier-priced provisioning cost of one service-node assignment.
+
+    ``cost_scale`` (snapshot-level, default 1.0) expresses one priced CPU unit in the latency
+    objective's units (milliseconds); the theta projection sets it so that w_cost = 1 weighs a
+    tier-price difference comparably to a WAN-hop latency difference.
+    """
+
+    demand = float(service.get("demand", service.get("cpu", 0.0)))
+    return float(node.get("price", 1.0)) * demand * float(node.get("cost_scale", 1.0))
+
+
+def _node_tier(node: Mapping[str, Any]) -> str:
+    """Return the node's single tier label, or '' when it is not tier-anchored."""
+
+    layers = _node_layers(node)
+    return layers[0] if len(layers) == 1 else ""
+
+
+def _is_egress_flow(nodes: Mapping[str, Any], src_node: str, dst_node: str) -> bool:
+    """Return whether a flow between two nodes crosses into the cloud tier."""
+
+    return _node_tier(nodes[dst_node]) == "cloud" and _node_tier(nodes[src_node]) != "cloud"
+
+
+def _satisfies_constraints(snapshot: Mapping[str, Any], placement: Mapping[str, str]) -> bool:
+    """Check the optional hard constraints (egress budget, energy cap) for a placement."""
+
+    constraints = snapshot.get("constraints", {}) or {}
+    nodes = snapshot["nodes"]
+    egress_budget = float(constraints.get("egress_budget_mb", inf))
+    if egress_budget != inf:
+        egress = sum(
+            float(flow.get("volume_mb", 0.0))
+            for flow in snapshot.get("flows", [])
+            if _is_egress_flow(nodes, placement[flow["source"]], placement[flow["target"]])
+        )
+        if egress > egress_budget + 1e-9:
+            return False
+    energy_cap = float(constraints.get("energy_cap_w", inf))
+    if energy_cap != inf and _energy_objective(snapshot, placement) > energy_cap + 1e-9:
+        return False
+    return True
 
 
 def _milp_constraints(
@@ -484,6 +541,23 @@ def _milp_constraints(
         for src_node, dst_node in pairs:
             row[y_index[(flow_idx, src_node, dst_node)]] = 1.0
         constraints.append(LinearConstraint(row, 1.0, 1.0))
+
+    hard = snapshot.get("constraints", {}) or {}
+    egress_budget = float(hard.get("egress_budget_mb", inf))
+    if egress_budget != inf:
+        row = np_module.zeros(variables, dtype=float)
+        for flow_idx, flow in enumerate(snapshot.get("flows", [])):
+            volume = float(flow.get("volume_mb", 0.0))
+            for src_node, dst_node in flow_pairs[flow_idx]:
+                if _is_egress_flow(snapshot["nodes"], src_node, dst_node):
+                    row[y_index[(flow_idx, src_node, dst_node)]] += volume
+        constraints.append(LinearConstraint(row, -np_module.inf, egress_budget))
+    energy_cap = float(hard.get("energy_cap_w", inf))
+    if energy_cap != inf:
+        row = np_module.zeros(variables, dtype=float)
+        for (service_id, node_id), idx in x_index.items():
+            row[idx] = _assignment_energy(snapshot["services"][service_id], snapshot["nodes"][node_id])
+        constraints.append(LinearConstraint(row, -np_module.inf, energy_cap))
 
     for placement in no_good_assignments:
         row = np_module.zeros(variables, dtype=float)
@@ -599,6 +673,7 @@ def _weighted_objective(
     components = {
         "latency": _latency_objective(model, snapshot, placement),
         "energy": _energy_objective(snapshot, placement),
+        "cost": _cost_objective(snapshot, placement),
         "resource_overcommit": _resource_overcommit_objective(snapshot, placement),
         "failure_risk": _failure_risk_objective(model, snapshot, placement),
     }
@@ -632,18 +707,30 @@ def _latency_objective(model: _SnapshotModel, snapshot: Mapping[str, Any], place
 
 
 def _energy_objective(snapshot: Mapping[str, Any], placement: Mapping[str, str]) -> float:
-    """Estimate placed-service energy from node power coefficients."""
+    """Estimate the placement's dynamic power (W) from node power coefficients.
+
+    Idle power is excluded: the simulator keeps every node powered whatever the placement, so
+    idle power is a constant of the infrastructure, not of the decision.
+    """
 
     total = 0.0
     for service_id, node_id in placement.items():
         service = snapshot["services"][service_id]
         node = snapshot["nodes"][node_id]
         demand = float(service.get("demand", service.get("cpu", 0.0)))
-        total += float(node.get("idle_power_w", 0.0))
         total += float(node.get("dynamic_power_w_per_cpu", 0.0)) * demand
         total += float(node.get("dynamic_power_w_per_ram", 0.0)) * float(service.get("ram", 0.0))
         total += float(node.get("dynamic_power_w_per_storage", 0.0)) * float(service.get("storage", 0.0))
     return total
+
+
+def _cost_objective(snapshot: Mapping[str, Any], placement: Mapping[str, str]) -> float:
+    """Sum tier-priced provisioning cost over placed services."""
+
+    return sum(
+        _assignment_cost(snapshot["services"][service_id], snapshot["nodes"][node_id])
+        for service_id, node_id in placement.items()
+    )
 
 
 def _resource_overcommit_objective(snapshot: Mapping[str, Any], placement: Mapping[str, str]) -> float:
