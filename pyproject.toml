@@ -36,7 +36,7 @@ dependencies = ["PyYAML>=6.0", "loguru>=0.7"]
 [project.optional-dependencies]
 milp = ["scipy>=1.11", "numpy>=1.24"]
 figures = ["matplotlib>=3.7", "numpy>=1.24"]
-dev = ["pytest>=8.0"]
+dev = ["pytest>=8.0", "anyio>=4.0"]
 
 [project.urls]
 Homepage = "https://github.com/lilanpei/ContinuumBench"
