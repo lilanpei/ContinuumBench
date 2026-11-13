@@ -9,7 +9,7 @@ description = "Reproducible continuum placement and autoscaling benchmarks with 
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "Lilan Pei" }]
+authors = [{ name = "Lanpei Li" }]
 keywords = [
     "continuum computing",
     "edge computing",
