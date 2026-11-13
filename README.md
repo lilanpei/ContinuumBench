@@ -10,8 +10,8 @@ ContinuumBench is Eclypse-native by default: application graphs, infrastructure 
 
 | Version | Where | Paper |
 |---|---|---|
-| 1.0 | branch `main`, tag `v1.0-europar-frame` | ContinuumBench (FRAME 2026 at Euro-Par 2026) |
-| 1.1 | branch `continuum-intent-compiler`, tag `v1.1.0` | Continual Instruction Tuning for LLM-based Management of Continuum Resources (RISE-DL 2026 at IoT 2026) |
+| 1.0 | branch `europar-frame-2026`, tag `v1.0-europar-frame` | ContinuumBench (FRAME 2026 at Euro-Par 2026) |
+| 1.1 | branch `main`, tag `v1.1.0` | Continual Instruction Tuning for LLM-based Management of Continuum Resources (RISE-DL 2026 at IoT 2026) |
 
 Version 1.1 adds a knob interface through which an intent compiler sets the controller's parameters, three scenario variants, and the controllers they use. It also changes some simulator behavior and accounting (see [CHANGELOG.md](CHANGELOG.md)), so the ContinuumBench paper's results come from version 1.0. The intent compiler itself, its data and its trained adapters will be released in a companion repository, `continuum-intent-compiler`.
 
@@ -176,7 +176,7 @@ Epoch-level resource records expose both views:
 
 ## Reproduce The ContinuumBench Paper
 
-Check out the tag `v1.0-europar-frame` first: version 1.1 changes some simulator behavior and accounting (see [CHANGELOG.md](CHANGELOG.md)). The intent-compiler paper will be reproduced from the companion repository `continuum-intent-compiler`.
+Check out the tag `v1.0-europar-frame` (or the branch `europar-frame-2026`) first: version 1.1 changes some simulator behavior and accounting (see [CHANGELOG.md](CHANGELOG.md)). The intent-compiler paper will be reproduced from the companion repository `continuum-intent-compiler`.
 
 ```bash
 make smoke       # fast end-to-end check (sota_pilot, 3 seeds; minutes)

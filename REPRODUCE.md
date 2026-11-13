@@ -4,9 +4,9 @@ This is the authoritative guide for regenerating every table and figure in the p
 is deterministic and file-based: **sweep manifests → run directories → aggregated CSV/JSON →
 tables/figures**.
 
-Run this guide on the tag `v1.0-europar-frame`. Version 1.1, on the branch
-`continuum-intent-compiler`, changes some simulator behavior and accounting (see
-[CHANGELOG.md](CHANGELOG.md)), so it does not reproduce the paper's numbers.
+Run this guide on the tag `v1.0-europar-frame` or the branch `europar-frame-2026`. Version 1.1,
+on `main`, changes some simulator behavior and accounting (see [CHANGELOG.md](CHANGELOG.md)), so it
+does not reproduce the paper's numbers.
 
 ## 1. Environment
 
