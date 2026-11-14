@@ -2,7 +2,7 @@
 
 ## 1.1.0 (2026-11-13)
 
-Version 1.1.0 is on `main`. It adds what the intent-compiler paper (RISE-DL 2026) needs: a knob interface through which an intent compiler sets the controller's parameters, three scenario variants, and the controllers they use. It also changes some simulator behavior and accounting, which can alter the results of runs that version 1.0 supports, so the ContinuumBench paper's results come from the branch `europar-frame-2026` and the tag `v1.0-europar-frame`.
+Version 1.1.0 is on `main`. It adds what the intent-compiler paper (RISE-DL 2026) needs: three scenario variants, the controllers they use, and a knob interface through which an intent compiler sets the controller's parameters. It also changes some simulator behavior and accounting, which can alter the results of runs that version 1.0 supports, so the ContinuumBench paper's results come from the branch `europar-frame-2026` and the tag `v1.0-europar-frame`.
 
 ### Added
 

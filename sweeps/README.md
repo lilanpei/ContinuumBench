@@ -10,6 +10,7 @@ This directory contains benchmark sweep manifests.
 - `main.yaml`: larger publication matrix over scenarios, F0/F2 endpoints, controller families including `rl_meta` and a solver-backed MILP placement reference, and 10 seeds.
 - `realism_ladder.yaml`: legacy-named evaluation-regime and overlay ablation using the old T0--T4 compatibility labels.
 - `sensitivity_load.yaml`: load-sensitivity protocol over F2 configs.
+- `sensitivity_contact.yaml`: contact-sensitivity protocol over the trace-backed EO and driving configs.
 - `sensitivity_failure.yaml`: node-failure-sensitivity protocol over base configs.
 - `delay_breakdown.yaml`: compact F2 sweep for per-cause completed-task delay components.
 - `milp_reference.yaml`: compact F2 solver-backed static placement reference.
@@ -23,6 +24,7 @@ Current public sweep manifests:
 - `main.yaml`: full baseline-family publication matrix for main runs
 - `realism_ladder.yaml`: evaluation-regime and overlay ablation for ranking-sensitivity analysis
 - `sensitivity_load.yaml`: load stress sweep for dynamics validation
+- `sensitivity_contact.yaml`: contact stress sweep for dynamics validation
 - `sensitivity_failure.yaml`: failure stress sweep for dynamics validation
 - `delay_breakdown.yaml`: delay-cause sensitivity sweep
 - `milp_reference.yaml`: MILP placement-reference sweep

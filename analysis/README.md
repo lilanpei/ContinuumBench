@@ -1,6 +1,6 @@
 # Analysis Pipeline
 
-> **Reproducing the submitted paper:** use `sweeps/main.yaml` (main comparison) plus the
+> **Reproducing the ContinuumBench paper** (on the branch `europar-frame-2026`)**:** use `sweeps/main.yaml` (main comparison) plus the
 > `realism_ladder`, `sensitivity_*`, `delay_breakdown`, and `milp_reference`
 > manifests, then `aggregate_runs.py` -> `tables.py` -> `figures.py`. See
 > [`../REPRODUCE.md`](../REPRODUCE.md) for the artifact-to-command map.

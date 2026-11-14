@@ -51,7 +51,7 @@ Paper role:
    - **Without editing the benchmark** (recommended for your own work): add a module
      `continuum_bench/controllers/extensions_local.py` exposing
      `build(name, config, runner)`. Return your controller when `name` matches the
-     `--controller` value you want, and `None` otherwise. `extensions.py` loads it on demand, so
+     `--controller` value you want, in lower case (the runner lower-cases it), and `None` otherwise. `extensions.py` loads it on demand, so
      the benchmark stays upgradable underneath you. The `runner` argument lets a composite policy
      build sub-controllers via `runner._build_controller(name, config)`.
    - **As a built-in**: add a `--controller` name branch in

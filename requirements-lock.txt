@@ -1,5 +1,6 @@
 # Exact Python package versions used to produce the committed ContinuumBench results.
-# Tested with CPython 3.11.8. For a faithful reproduction:  pip install -r requirements-lock.txt
+# Tested with CPython 3.11.8. Install it first (pip install -r requirements-lock.txt), then the
+# package and ECLYPSE as README.md describes.
 #
 # The ECLYPSE substrate is an external dependency pinned separately (see README.md / REPRODUCE.md):
 #   eclypse 0.8.1 (commit 73806b7), supplied via ECLYPSE_HOME or pip.

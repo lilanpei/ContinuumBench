@@ -39,4 +39,4 @@ Design intent:
 
 Recommended workflow:
 - use focused tests while implementing
-- run `pytest tests -q` before integrating milestone slices back into `main`
+- run `pytest tests -q` before committing a change

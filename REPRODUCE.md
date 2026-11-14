@@ -4,28 +4,27 @@ This is the authoritative guide for regenerating every table and figure in the p
 is deterministic and file-based: **sweep manifests → run directories → aggregated CSV/JSON →
 tables/figures**.
 
-Run this guide on the tag `v1.0-europar-frame` or the branch `europar-frame-2026`. Version 1.1,
+Run this guide on the branch `europar-frame-2026` (the tag `v1.0-europar-frame` holds the same
+code, without the branch's test dependency `anyio`). Version 1.1,
 on `main`, changes some simulator behavior and accounting (see [CHANGELOG.md](CHANGELOG.md)), so it
 does not reproduce the paper's numbers.
 
 ## 1. Environment
 
-Tested with **CPython 3.11.8**. Use an explicit interpreter so you do not fall below the 3.10 floor:
+Tested with **CPython 3.11.8**. Use an explicit interpreter within the range that ECLYPSE 0.8.1 supports, 3.11 to 3.13:
 
 ```bash
 python3.11 -m venv .venv
 source .venv/bin/activate
+pip install -r requirements-lock.txt  # optional: the exact versions of the paper's runs
 pip install -e ".[milp,figures,dev]"  # core + scipy/numpy (MILP) + matplotlib (figures) + pytest
-# or, for an exact pin of the versions used for the committed results:
-pip install -r requirements-lock.txt
 ```
 
 The **ECLYPSE** substrate is an external dependency, pinned to **eclypse 0.8.1 (commit `73806b7`)**.
-Make it importable either via pip or via an `ECLYPSE_HOME` checkout:
+Install it with pip (or set `ECLYPSE_HOME` to a checkout whose dependencies are installed):
 
 ```bash
-git clone https://github.com/eclypse-org/eclypse && cd eclypse && git checkout 73806b7
-pip install -e . && export ECLYPSE_HOME=$(pwd)
+git clone https://github.com/eclypse-org/eclypse && (cd eclypse && git checkout 73806b7 && pip install -e .)
 ```
 
 Determinism: every run uses fixed integer seeds (main comparison: 0–9; sensitivity sweeps: 0–2).
