@@ -1,4 +1,11 @@
-"""Check completion-aware score sensitivity on grouped paper results."""
+"""Check completion-aware score sensitivity on grouped paper results.
+
+This is the score-robustness check of the ContinuumBench paper (Section 5). It perturbs the four
+weights of the completion-aware score over an 81-point grid and reports, for each scenario-regime
+context of the main comparison, whether the selected representative of a family changes. The
+scale-capable family here is HPA, KEDA and the joint heuristic (``separated_loops``); the
+placement-only family is round-robin, best-fit, cost-greedy and the MILP.
+"""
 
 from __future__ import annotations
 
@@ -11,6 +18,13 @@ from typing import Any
 
 SCENARIOS = ["eo_dual_stream", "driving_v2x", "split_inference", "industrial_iot"]
 REGIMES = ["F0", "F2"]
+REGIME_NAMES = {"F0": "R1", "F2": "R2"}
+SCENARIO_NAMES = {
+    "eo_dual_stream": "EO dual stream",
+    "driving_v2x": "Driving V2X",
+    "split_inference": "Split inference",
+    "industrial_iot": "Industrial IoT",
+}
 SCALE_CAPABLE = {"hpa", "keda", "separated_loops"}
 PLACEMENT_ONLY = {
     "best_fit",
@@ -48,15 +62,31 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--out",
-        default="runs/main/analysis/score_sensitivity.json",
-        help="Output JSON path for the sensitivity summary.",
+        default=None,
+        help="Output JSON path; defaults to score_sensitivity.json beside --grouped-csv.",
     )
     args = parser.parse_args(argv)
 
-    summary = score_sensitivity(Path(args.grouped_csv))
-    out_path = Path(args.out)
+    grouped_csv = Path(args.grouped_csv)
+    summary = score_sensitivity(grouped_csv)
+    out_path = Path(args.out) if args.out else grouped_csv.parent / "score_sensitivity.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8")
+    changed = [
+        f"{SCENARIO_NAMES.get(context['scenario'], context['scenario'])} "
+        f"{REGIME_NAMES.get(context['evaluation_regime'], context['evaluation_regime'])}"
+        for context in summary["contexts"]
+        if context["controller_choice_changed"]
+    ]
+    reduction = summary["min_slo_reduction_placement_minus_scale"]
+    print(
+        f"Over the {summary['weight_grid_size']}-point weight grid, the selected representatives "
+        f"change in {len(changed)} of {summary['total_contexts']} scenario-regime contexts"
+        + (f" ({', '.join(changed)})" if changed else "")
+        + "; the scale-capable representative "
+        + ("has" if reduction > 0 else "does not always have")
+        + f" the lower SLO-violation rate (smallest reduction {reduction:.2f})."
+    )
     print(f"Score-sensitivity summary: {out_path}")
     return 0
 

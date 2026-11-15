@@ -1,8 +1,9 @@
 """Golden regression test pinning the paper's headline numbers.
 
-This guards Table 1 and the score-robustness claims (Sec. Results / Appendix) so that a change to
-``summarize_epochs``, the SLO classifier, the selection score, or any controller cannot silently
-shift the reported values. The frozen snapshot lives in ``tests/golden/main_headline.json``.
+This guards the paper's Table 3 (the main comparison) and its score-robustness check, so that a
+change to ``summarize_epochs``, the SLO classifier, the selection score, or any controller cannot
+silently shift the reported values. The frozen snapshot lives in
+``tests/golden/main_headline.json``.
 
 When the (git-ignored) ``runs/main`` analysis artifacts are present locally -- i.e. after
 re-running ``sweeps/main.yaml`` plus the analysis pipeline -- this test recomputes the
@@ -31,15 +32,15 @@ requires_runs = pytest.mark.skipif(
 
 
 @requires_runs
-def test_table1_headline_cells_match_golden() -> None:
-    """Every Table-1 (scenario, regime, controller) cell still matches the frozen snapshot."""
+def test_table3_cells_match_golden() -> None:
+    """Every cell behind Table 3 (scenario, regime, controller) matches the frozen snapshot."""
 
     rows: dict[tuple[str, str, str], dict[str, str]] = {}
     with GROUPED.open() as handle:
         for row in csv.DictReader(handle):
             rows[(row["scenario"], row.get("realism_tier", ""), row["controller"])] = row
 
-    for cell in GOLDEN["table1_cells"]:
+    for cell in GOLDEN["table3_cells"]:
         key = (cell["scenario"], cell["realism_tier"], cell["controller"])
         assert key in rows, f"missing group {key} in grouped_strict.csv"
         row = rows[key]
@@ -50,7 +51,7 @@ def test_table1_headline_cells_match_golden() -> None:
 
 @requires_runs
 def test_score_robustness_invariants_match_golden() -> None:
-    """The score-sensitivity claims (2 of 8 contexts, 81-grid, >=0.14 SLO, <=0.001 completion delta) hold."""
+    """Score robustness: 1 of 8 contexts changes over the 81-point grid; SLO reduction about 0.14."""
 
     score = json.loads(SCORE.read_text())
     golden = GOLDEN["score_sensitivity"]

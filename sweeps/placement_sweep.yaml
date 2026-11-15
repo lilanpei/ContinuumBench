@@ -1,0 +1,130 @@
+# Finding 3 of the ContinuumBench paper: the placement sweep.
+# Six placement strategies at fixed capacity (placement-only controllers) on the placement-stress
+# variant, on its control (the CPU, edge-cloud link and frame sizes of eo_small.yaml) and on
+# unmodified EO at the main protocol.
+# 3 settings x 6 strategies x 5 seeds = 90 runs.
+# Analyze with: python analysis/findings.py placement --sweep-dir runs/placement_sweep
+name: placement_sweep
+config: configs/eo_placement_stress.yaml
+seeds:
+- 0
+- 1
+- 2
+- 3
+- 4
+overrides: {}
+runs:
+- name: stress_min_latency
+  controller: placement_only:min_latency
+  config: configs/eo_placement_stress.yaml
+  overrides: {}
+- name: stress_nearest_feasible_edge
+  controller: placement_only:nearest_feasible_edge
+  config: configs/eo_placement_stress.yaml
+  overrides: {}
+- name: stress_dependency_aware
+  controller: placement_only:dependency_aware
+  config: configs/eo_placement_stress.yaml
+  overrides: {}
+- name: stress_best_fit
+  controller: placement_only:best_fit
+  config: configs/eo_placement_stress.yaml
+  overrides: {}
+- name: stress_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/eo_placement_stress.yaml
+  overrides: {}
+- name: stress_milp
+  controller: placement_only:milp
+  config: configs/eo_placement_stress.yaml
+  overrides: {}
+- name: control_min_latency
+  controller: placement_only:min_latency
+  config: configs/eo_placement_control.yaml
+  overrides: {}
+- name: control_nearest_feasible_edge
+  controller: placement_only:nearest_feasible_edge
+  config: configs/eo_placement_control.yaml
+  overrides: {}
+- name: control_dependency_aware
+  controller: placement_only:dependency_aware
+  config: configs/eo_placement_control.yaml
+  overrides: {}
+- name: control_best_fit
+  controller: placement_only:best_fit
+  config: configs/eo_placement_control.yaml
+  overrides: {}
+- name: control_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/eo_placement_control.yaml
+  overrides: {}
+- name: control_milp
+  controller: placement_only:milp
+  config: configs/eo_placement_control.yaml
+  overrides: {}
+- name: eo_min_latency
+  controller: placement_only:min_latency
+  config: configs/eo_small.yaml
+  overrides:
+    epochs: 120
+    drain_epochs: 60
+    workload:
+      repeat: true
+    infrastructure:
+      contact_schedule:
+        repeat: true
+- name: eo_nearest_feasible_edge
+  controller: placement_only:nearest_feasible_edge
+  config: configs/eo_small.yaml
+  overrides:
+    epochs: 120
+    drain_epochs: 60
+    workload:
+      repeat: true
+    infrastructure:
+      contact_schedule:
+        repeat: true
+- name: eo_dependency_aware
+  controller: placement_only:dependency_aware
+  config: configs/eo_small.yaml
+  overrides:
+    epochs: 120
+    drain_epochs: 60
+    workload:
+      repeat: true
+    infrastructure:
+      contact_schedule:
+        repeat: true
+- name: eo_best_fit
+  controller: placement_only:best_fit
+  config: configs/eo_small.yaml
+  overrides:
+    epochs: 120
+    drain_epochs: 60
+    workload:
+      repeat: true
+    infrastructure:
+      contact_schedule:
+        repeat: true
+- name: eo_cost_greedy
+  controller: placement_only:cost_greedy
+  config: configs/eo_small.yaml
+  overrides:
+    epochs: 120
+    drain_epochs: 60
+    workload:
+      repeat: true
+    infrastructure:
+      contact_schedule:
+        repeat: true
+- name: eo_milp
+  controller: placement_only:milp
+  config: configs/eo_small.yaml
+  overrides:
+    epochs: 120
+    drain_epochs: 60
+    workload:
+      repeat: true
+    infrastructure:
+      contact_schedule:
+        repeat: true

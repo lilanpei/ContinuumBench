@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 import shutil
 from pathlib import Path
@@ -26,7 +27,9 @@ def run_sweep(manifest_path: Path, out_root: Path) -> list[dict[str, Any]]:
             seed=spec.seed,
             out_root=Path(out_root),
         )
-        rendered_config_path = _attach_config_to_run_dir(staging_config_path, Path(result["run_dir"]))
+        run_dir = Path(result["run_dir"])
+        rendered_config_path = _attach_config_to_run_dir(staging_config_path, run_dir)
+        _record_sweep_entry(spec, run_dir)
         results.append(
             {
                 "sweep": spec.sweep_name,
@@ -61,6 +64,32 @@ def _attach_config_to_run_dir(staging_config_path: Path, run_dir: Path) -> Path:
     rendered_config_path = provenance_dir / "config.yaml"
     shutil.copy2(staging_config_path, rendered_config_path)
     return rendered_config_path
+
+
+def _record_sweep_entry(spec: RunSpec, run_dir: Path) -> None:
+    """Record which manifest run and seed produced a run directory.
+
+    The analysis scripts read ``provenance/sweep.json`` to check that a sweep is complete and to
+    tell apart runs that share a scenario, a controller and a configuration family, such as the
+    three settings of the placement sweep.
+    """
+
+    base_config = Path(spec.base_config_path)
+    try:
+        base_config = base_config.resolve().relative_to(Path.cwd().resolve())
+    except ValueError:
+        pass
+    entry = {
+        "sweep": spec.sweep_name,
+        "run": spec.run_name,
+        "seed": spec.seed,
+        "controller": spec.controller,
+        "base_config": str(base_config),
+    }
+    provenance_dir = run_dir / "provenance"
+    provenance_dir.mkdir(parents=True, exist_ok=True)
+    with (provenance_dir / "sweep.json").open("w", encoding="utf-8") as handle:
+        json.dump(entry, handle, indent=2)
 
 
 def _slug(value: str) -> str:

@@ -112,7 +112,35 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Grouped strict CSV: {outputs['grouped_csv']}")
     print(f"Ranking CSV: {outputs['ranking_csv']}")
     print(f"Rank stability CSV: {outputs['rank_stability_csv']}")
+    _warn_degenerate_cells(Path(outputs["grouped_csv"]), args.min_completion_for_latency_rank)
     return 0
+
+
+def _warn_degenerate_cells(grouped_csv: Path, completion_threshold: float) -> None:
+    """Name the cells that complete no work, and those the completion threshold ranks last.
+
+    A controller that completes less than ``completion_threshold`` of its tasks is ranked below
+    every other one, so it never appears as a selected controller. Naming it here keeps a
+    controller that delivers nothing from going unnoticed.
+    """
+
+    zero: list[str] = []
+    below: list[str] = []
+    with grouped_csv.open(encoding="utf-8", newline="") as handle:
+        for row in csv.DictReader(handle):
+            completion = float(row["completion_ratio"])
+            label = f"{row['scenario']}/{row['evaluation_regime']}/{row['controller']}"
+            if completion == 0.0:
+                zero.append(label)
+            elif completion < completion_threshold:
+                below.append(f"{label} ({completion:.3f})")
+    if zero:
+        print(f"Warning: {len(zero)} cell(s) complete no work: {', '.join(sorted(zero))}")
+    if below:
+        print(
+            f"Note: {len(below)} cell(s) complete less than {completion_threshold:g} of their tasks "
+            f"and rank below every other controller: {', '.join(sorted(below))}"
+        )
 
 
 def _read_rows(path: Path) -> list[dict[str, Any]]:

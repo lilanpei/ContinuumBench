@@ -1,0 +1,984 @@
+# Finding 2 of the ContinuumBench paper: the load sweep under R1.
+# 4 scenarios x 4 arrival-rate factors (0.6x to 2.0x) x 6 controllers x 5 seeds = 480 runs.
+# Analyze with: python analysis/findings.py load --sweep-dir runs/load_sweep
+name: load_sweep
+config: configs/eo_small.yaml
+seeds:
+- 0
+- 1
+- 2
+- 3
+- 4
+overrides:
+  epochs: 120
+  drain_epochs: 60
+  workload:
+    repeat: true
+  infrastructure:
+    contact_schedule:
+      repeat: true
+runs:
+- name: eo_L060_hpa
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    workload: &id001
+      streams:
+        SpaceSource:
+          generator: piecewise
+          segments:
+          - epochs: 10
+            rate: 0.48
+          - epochs: 15
+            rate: 1.8
+          - epochs: 15
+            rate: 0.6
+        IoTSource:
+          generator: piecewise
+          segments:
+          - epochs: 20
+            rate: 1.2
+          - epochs: 10
+            rate: 2.4
+          - epochs: 10
+            rate: 0.9
+    placement:
+      strategy: min_latency
+- name: eo_L060_keda
+  controller: keda
+  config: configs/eo_small.yaml
+  overrides:
+    workload: *id001
+    placement:
+      strategy: min_latency
+- name: eo_L060_sep
+  controller: separated_loops
+  config: configs/eo_small.yaml
+  overrides:
+    workload: *id001
+    placement:
+      strategy: min_latency
+- name: eo_L060_static_minlat
+  controller: placement_only:min_latency
+  config: configs/eo_small.yaml
+  overrides:
+    workload: *id001
+    placement:
+      strategy: min_latency
+- name: eo_L060_milp_ref
+  controller: placement_only:milp
+  config: configs/eo_small.yaml
+  overrides:
+    workload: *id001
+    placement:
+      strategy: min_latency
+- name: eo_L060_ceiling
+  controller: no_scaling
+  config: configs/eo_small.yaml
+  overrides:
+    workload: *id001
+    placement:
+      strategy: min_latency
+    scaling:
+      pools:
+        BulkPath:
+          min_workers: 4
+          initial_workers: 4
+          max_workers: 4
+- name: eo_L100_hpa
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    workload: &id002
+      streams:
+        SpaceSource:
+          generator: piecewise
+          segments:
+          - epochs: 10
+            rate: 0.8
+          - epochs: 15
+            rate: 3.0
+          - epochs: 15
+            rate: 1.0
+        IoTSource:
+          generator: piecewise
+          segments:
+          - epochs: 20
+            rate: 2.0
+          - epochs: 10
+            rate: 4.0
+          - epochs: 10
+            rate: 1.5
+    placement:
+      strategy: min_latency
+- name: eo_L100_keda
+  controller: keda
+  config: configs/eo_small.yaml
+  overrides:
+    workload: *id002
+    placement:
+      strategy: min_latency
+- name: eo_L100_sep
+  controller: separated_loops
+  config: configs/eo_small.yaml
+  overrides:
+    workload: *id002
+    placement:
+      strategy: min_latency
+- name: eo_L100_static_minlat
+  controller: placement_only:min_latency
+  config: configs/eo_small.yaml
+  overrides:
+    workload: *id002
+    placement:
+      strategy: min_latency
+- name: eo_L100_milp_ref
+  controller: placement_only:milp
+  config: configs/eo_small.yaml
+  overrides:
+    workload: *id002
+    placement:
+      strategy: min_latency
+- name: eo_L100_ceiling
+  controller: no_scaling
+  config: configs/eo_small.yaml
+  overrides:
+    workload: *id002
+    placement:
+      strategy: min_latency
+    scaling:
+      pools:
+        BulkPath:
+          min_workers: 4
+          initial_workers: 4
+          max_workers: 4
+- name: eo_L150_hpa
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    workload: &id003
+      streams:
+        SpaceSource:
+          generator: piecewise
+          segments:
+          - epochs: 10
+            rate: 1.2
+          - epochs: 15
+            rate: 4.5
+          - epochs: 15
+            rate: 1.5
+        IoTSource:
+          generator: piecewise
+          segments:
+          - epochs: 20
+            rate: 3.0
+          - epochs: 10
+            rate: 6.0
+          - epochs: 10
+            rate: 2.25
+    placement:
+      strategy: min_latency
+- name: eo_L150_keda
+  controller: keda
+  config: configs/eo_small.yaml
+  overrides:
+    workload: *id003
+    placement:
+      strategy: min_latency
+- name: eo_L150_sep
+  controller: separated_loops
+  config: configs/eo_small.yaml
+  overrides:
+    workload: *id003
+    placement:
+      strategy: min_latency
+- name: eo_L150_static_minlat
+  controller: placement_only:min_latency
+  config: configs/eo_small.yaml
+  overrides:
+    workload: *id003
+    placement:
+      strategy: min_latency
+- name: eo_L150_milp_ref
+  controller: placement_only:milp
+  config: configs/eo_small.yaml
+  overrides:
+    workload: *id003
+    placement:
+      strategy: min_latency
+- name: eo_L150_ceiling
+  controller: no_scaling
+  config: configs/eo_small.yaml
+  overrides:
+    workload: *id003
+    placement:
+      strategy: min_latency
+    scaling:
+      pools:
+        BulkPath:
+          min_workers: 4
+          initial_workers: 4
+          max_workers: 4
+- name: eo_L200_hpa
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    workload: &id004
+      streams:
+        SpaceSource:
+          generator: piecewise
+          segments:
+          - epochs: 10
+            rate: 1.6
+          - epochs: 15
+            rate: 6.0
+          - epochs: 15
+            rate: 2.0
+        IoTSource:
+          generator: piecewise
+          segments:
+          - epochs: 20
+            rate: 4.0
+          - epochs: 10
+            rate: 8.0
+          - epochs: 10
+            rate: 3.0
+    placement:
+      strategy: min_latency
+- name: eo_L200_keda
+  controller: keda
+  config: configs/eo_small.yaml
+  overrides:
+    workload: *id004
+    placement:
+      strategy: min_latency
+- name: eo_L200_sep
+  controller: separated_loops
+  config: configs/eo_small.yaml
+  overrides:
+    workload: *id004
+    placement:
+      strategy: min_latency
+- name: eo_L200_static_minlat
+  controller: placement_only:min_latency
+  config: configs/eo_small.yaml
+  overrides:
+    workload: *id004
+    placement:
+      strategy: min_latency
+- name: eo_L200_milp_ref
+  controller: placement_only:milp
+  config: configs/eo_small.yaml
+  overrides:
+    workload: *id004
+    placement:
+      strategy: min_latency
+- name: eo_L200_ceiling
+  controller: no_scaling
+  config: configs/eo_small.yaml
+  overrides:
+    workload: *id004
+    placement:
+      strategy: min_latency
+    scaling:
+      pools:
+        BulkPath:
+          min_workers: 4
+          initial_workers: 4
+          max_workers: 4
+- name: driving_L060_hpa
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    workload: &id005
+      streams:
+        VehicleSource:
+          generator: piecewise
+          segments:
+          - epochs: 15
+            rate: 1.2
+          - epochs: 15
+            rate: 3.0
+          - epochs: 15
+            rate: 1.5
+    placement:
+      strategy: min_latency
+- name: driving_L060_keda
+  controller: keda
+  config: configs/driving_small.yaml
+  overrides:
+    workload: *id005
+    placement:
+      strategy: min_latency
+- name: driving_L060_sep
+  controller: separated_loops
+  config: configs/driving_small.yaml
+  overrides:
+    workload: *id005
+    placement:
+      strategy: min_latency
+- name: driving_L060_static_minlat
+  controller: placement_only:min_latency
+  config: configs/driving_small.yaml
+  overrides:
+    workload: *id005
+    placement:
+      strategy: min_latency
+- name: driving_L060_milp_ref
+  controller: placement_only:milp
+  config: configs/driving_small.yaml
+  overrides:
+    workload: *id005
+    placement:
+      strategy: min_latency
+- name: driving_L060_ceiling
+  controller: no_scaling
+  config: configs/driving_small.yaml
+  overrides:
+    workload: *id005
+    placement:
+      strategy: min_latency
+    scaling:
+      pools:
+        Offload:
+          min_workers: 3
+          initial_workers: 3
+          max_workers: 3
+- name: driving_L100_hpa
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    workload: &id006
+      streams:
+        VehicleSource:
+          generator: piecewise
+          segments:
+          - epochs: 15
+            rate: 2.0
+          - epochs: 15
+            rate: 5.0
+          - epochs: 15
+            rate: 2.5
+    placement:
+      strategy: min_latency
+- name: driving_L100_keda
+  controller: keda
+  config: configs/driving_small.yaml
+  overrides:
+    workload: *id006
+    placement:
+      strategy: min_latency
+- name: driving_L100_sep
+  controller: separated_loops
+  config: configs/driving_small.yaml
+  overrides:
+    workload: *id006
+    placement:
+      strategy: min_latency
+- name: driving_L100_static_minlat
+  controller: placement_only:min_latency
+  config: configs/driving_small.yaml
+  overrides:
+    workload: *id006
+    placement:
+      strategy: min_latency
+- name: driving_L100_milp_ref
+  controller: placement_only:milp
+  config: configs/driving_small.yaml
+  overrides:
+    workload: *id006
+    placement:
+      strategy: min_latency
+- name: driving_L100_ceiling
+  controller: no_scaling
+  config: configs/driving_small.yaml
+  overrides:
+    workload: *id006
+    placement:
+      strategy: min_latency
+    scaling:
+      pools:
+        Offload:
+          min_workers: 3
+          initial_workers: 3
+          max_workers: 3
+- name: driving_L150_hpa
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    workload: &id007
+      streams:
+        VehicleSource:
+          generator: piecewise
+          segments:
+          - epochs: 15
+            rate: 3.0
+          - epochs: 15
+            rate: 7.5
+          - epochs: 15
+            rate: 3.75
+    placement:
+      strategy: min_latency
+- name: driving_L150_keda
+  controller: keda
+  config: configs/driving_small.yaml
+  overrides:
+    workload: *id007
+    placement:
+      strategy: min_latency
+- name: driving_L150_sep
+  controller: separated_loops
+  config: configs/driving_small.yaml
+  overrides:
+    workload: *id007
+    placement:
+      strategy: min_latency
+- name: driving_L150_static_minlat
+  controller: placement_only:min_latency
+  config: configs/driving_small.yaml
+  overrides:
+    workload: *id007
+    placement:
+      strategy: min_latency
+- name: driving_L150_milp_ref
+  controller: placement_only:milp
+  config: configs/driving_small.yaml
+  overrides:
+    workload: *id007
+    placement:
+      strategy: min_latency
+- name: driving_L150_ceiling
+  controller: no_scaling
+  config: configs/driving_small.yaml
+  overrides:
+    workload: *id007
+    placement:
+      strategy: min_latency
+    scaling:
+      pools:
+        Offload:
+          min_workers: 3
+          initial_workers: 3
+          max_workers: 3
+- name: driving_L200_hpa
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    workload: &id008
+      streams:
+        VehicleSource:
+          generator: piecewise
+          segments:
+          - epochs: 15
+            rate: 4.0
+          - epochs: 15
+            rate: 10.0
+          - epochs: 15
+            rate: 5.0
+    placement:
+      strategy: min_latency
+- name: driving_L200_keda
+  controller: keda
+  config: configs/driving_small.yaml
+  overrides:
+    workload: *id008
+    placement:
+      strategy: min_latency
+- name: driving_L200_sep
+  controller: separated_loops
+  config: configs/driving_small.yaml
+  overrides:
+    workload: *id008
+    placement:
+      strategy: min_latency
+- name: driving_L200_static_minlat
+  controller: placement_only:min_latency
+  config: configs/driving_small.yaml
+  overrides:
+    workload: *id008
+    placement:
+      strategy: min_latency
+- name: driving_L200_milp_ref
+  controller: placement_only:milp
+  config: configs/driving_small.yaml
+  overrides:
+    workload: *id008
+    placement:
+      strategy: min_latency
+- name: driving_L200_ceiling
+  controller: no_scaling
+  config: configs/driving_small.yaml
+  overrides:
+    workload: *id008
+    placement:
+      strategy: min_latency
+    scaling:
+      pools:
+        Offload:
+          min_workers: 3
+          initial_workers: 3
+          max_workers: 3
+- name: split_L060_hpa
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: &id009
+      streams:
+        CameraSource:
+          generator: piecewise
+          segments:
+          - epochs: 15
+            rate: 1.2
+          - epochs: 10
+            rate: 2.4
+          - epochs: 15
+            rate: 1.5
+    placement:
+      strategy: min_latency
+- name: split_L060_keda
+  controller: keda
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: *id009
+    placement:
+      strategy: min_latency
+- name: split_L060_sep
+  controller: separated_loops
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: *id009
+    placement:
+      strategy: min_latency
+- name: split_L060_static_minlat
+  controller: placement_only:min_latency
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: *id009
+    placement:
+      strategy: min_latency
+- name: split_L060_milp_ref
+  controller: placement_only:milp
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: *id009
+    placement:
+      strategy: min_latency
+- name: split_L060_ceiling
+  controller: no_scaling
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: *id009
+    placement:
+      strategy: min_latency
+    scaling:
+      pools:
+        CloudRefine:
+          min_workers: 2
+          initial_workers: 2
+          max_workers: 2
+- name: split_L100_hpa
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: &id010
+      streams:
+        CameraSource:
+          generator: piecewise
+          segments:
+          - epochs: 15
+            rate: 2.0
+          - epochs: 10
+            rate: 4.0
+          - epochs: 15
+            rate: 2.5
+    placement:
+      strategy: min_latency
+- name: split_L100_keda
+  controller: keda
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: *id010
+    placement:
+      strategy: min_latency
+- name: split_L100_sep
+  controller: separated_loops
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: *id010
+    placement:
+      strategy: min_latency
+- name: split_L100_static_minlat
+  controller: placement_only:min_latency
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: *id010
+    placement:
+      strategy: min_latency
+- name: split_L100_milp_ref
+  controller: placement_only:milp
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: *id010
+    placement:
+      strategy: min_latency
+- name: split_L100_ceiling
+  controller: no_scaling
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: *id010
+    placement:
+      strategy: min_latency
+    scaling:
+      pools:
+        CloudRefine:
+          min_workers: 2
+          initial_workers: 2
+          max_workers: 2
+- name: split_L150_hpa
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: &id011
+      streams:
+        CameraSource:
+          generator: piecewise
+          segments:
+          - epochs: 15
+            rate: 3.0
+          - epochs: 10
+            rate: 6.0
+          - epochs: 15
+            rate: 3.75
+    placement:
+      strategy: min_latency
+- name: split_L150_keda
+  controller: keda
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: *id011
+    placement:
+      strategy: min_latency
+- name: split_L150_sep
+  controller: separated_loops
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: *id011
+    placement:
+      strategy: min_latency
+- name: split_L150_static_minlat
+  controller: placement_only:min_latency
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: *id011
+    placement:
+      strategy: min_latency
+- name: split_L150_milp_ref
+  controller: placement_only:milp
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: *id011
+    placement:
+      strategy: min_latency
+- name: split_L150_ceiling
+  controller: no_scaling
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: *id011
+    placement:
+      strategy: min_latency
+    scaling:
+      pools:
+        CloudRefine:
+          min_workers: 2
+          initial_workers: 2
+          max_workers: 2
+- name: split_L200_hpa
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: &id012
+      streams:
+        CameraSource:
+          generator: piecewise
+          segments:
+          - epochs: 15
+            rate: 4.0
+          - epochs: 10
+            rate: 8.0
+          - epochs: 15
+            rate: 5.0
+    placement:
+      strategy: min_latency
+- name: split_L200_keda
+  controller: keda
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: *id012
+    placement:
+      strategy: min_latency
+- name: split_L200_sep
+  controller: separated_loops
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: *id012
+    placement:
+      strategy: min_latency
+- name: split_L200_static_minlat
+  controller: placement_only:min_latency
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: *id012
+    placement:
+      strategy: min_latency
+- name: split_L200_milp_ref
+  controller: placement_only:milp
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: *id012
+    placement:
+      strategy: min_latency
+- name: split_L200_ceiling
+  controller: no_scaling
+  config: configs/split_inference_small.yaml
+  overrides:
+    workload: *id012
+    placement:
+      strategy: min_latency
+    scaling:
+      pools:
+        CloudRefine:
+          min_workers: 2
+          initial_workers: 2
+          max_workers: 2
+- name: industrial_L060_hpa
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: &id013
+      streams:
+        SensorSource:
+          generator: piecewise
+          segments:
+          - epochs: 15
+            rate: 0.72
+          - epochs: 10
+            rate: 1.44
+          - epochs: 15
+            rate: 0.96
+    placement:
+      strategy: min_latency
+- name: industrial_L060_keda
+  controller: keda
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: *id013
+    placement:
+      strategy: min_latency
+- name: industrial_L060_sep
+  controller: separated_loops
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: *id013
+    placement:
+      strategy: min_latency
+- name: industrial_L060_static_minlat
+  controller: placement_only:min_latency
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: *id013
+    placement:
+      strategy: min_latency
+- name: industrial_L060_milp_ref
+  controller: placement_only:milp
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: *id013
+    placement:
+      strategy: min_latency
+- name: industrial_L060_ceiling
+  controller: no_scaling
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: *id013
+    placement:
+      strategy: min_latency
+    scaling:
+      pools:
+        BulkArchive:
+          min_workers: 3
+          initial_workers: 3
+          max_workers: 3
+- name: industrial_L100_hpa
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: &id014
+      streams:
+        SensorSource:
+          generator: piecewise
+          segments:
+          - epochs: 15
+            rate: 1.2
+          - epochs: 10
+            rate: 2.4
+          - epochs: 15
+            rate: 1.6
+    placement:
+      strategy: min_latency
+- name: industrial_L100_keda
+  controller: keda
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: *id014
+    placement:
+      strategy: min_latency
+- name: industrial_L100_sep
+  controller: separated_loops
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: *id014
+    placement:
+      strategy: min_latency
+- name: industrial_L100_static_minlat
+  controller: placement_only:min_latency
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: *id014
+    placement:
+      strategy: min_latency
+- name: industrial_L100_milp_ref
+  controller: placement_only:milp
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: *id014
+    placement:
+      strategy: min_latency
+- name: industrial_L100_ceiling
+  controller: no_scaling
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: *id014
+    placement:
+      strategy: min_latency
+    scaling:
+      pools:
+        BulkArchive:
+          min_workers: 3
+          initial_workers: 3
+          max_workers: 3
+- name: industrial_L150_hpa
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: &id015
+      streams:
+        SensorSource:
+          generator: piecewise
+          segments:
+          - epochs: 15
+            rate: 1.8
+          - epochs: 10
+            rate: 3.6
+          - epochs: 15
+            rate: 2.4
+    placement:
+      strategy: min_latency
+- name: industrial_L150_keda
+  controller: keda
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: *id015
+    placement:
+      strategy: min_latency
+- name: industrial_L150_sep
+  controller: separated_loops
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: *id015
+    placement:
+      strategy: min_latency
+- name: industrial_L150_static_minlat
+  controller: placement_only:min_latency
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: *id015
+    placement:
+      strategy: min_latency
+- name: industrial_L150_milp_ref
+  controller: placement_only:milp
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: *id015
+    placement:
+      strategy: min_latency
+- name: industrial_L150_ceiling
+  controller: no_scaling
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: *id015
+    placement:
+      strategy: min_latency
+    scaling:
+      pools:
+        BulkArchive:
+          min_workers: 3
+          initial_workers: 3
+          max_workers: 3
+- name: industrial_L200_hpa
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: &id016
+      streams:
+        SensorSource:
+          generator: piecewise
+          segments:
+          - epochs: 15
+            rate: 2.4
+          - epochs: 10
+            rate: 4.8
+          - epochs: 15
+            rate: 3.2
+    placement:
+      strategy: min_latency
+- name: industrial_L200_keda
+  controller: keda
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: *id016
+    placement:
+      strategy: min_latency
+- name: industrial_L200_sep
+  controller: separated_loops
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: *id016
+    placement:
+      strategy: min_latency
+- name: industrial_L200_static_minlat
+  controller: placement_only:min_latency
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: *id016
+    placement:
+      strategy: min_latency
+- name: industrial_L200_milp_ref
+  controller: placement_only:milp
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: *id016
+    placement:
+      strategy: min_latency
+- name: industrial_L200_ceiling
+  controller: no_scaling
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    workload: *id016
+    placement:
+      strategy: min_latency
+    scaling:
+      pools:
+        BulkArchive:
+          min_workers: 3
+          initial_workers: 3
+          max_workers: 3

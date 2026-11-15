@@ -1,0 +1,704 @@
+# Finding 1 of the ContinuumBench paper: the re-planning ablation.
+# 24 configurations x three placement schedules (coupled, periodic, fixed) x 5 seeds = 360 runs.
+# Analyze with: python analysis/findings.py replan --sweep-dir runs/replan_ablation
+name: replan_ablation
+config: configs/eo_small.yaml
+seeds:
+- 0
+- 1
+- 2
+- 3
+- 4
+overrides:
+  epochs: 120
+  drain_epochs: 60
+  workload:
+    repeat: true
+  infrastructure:
+    contact_schedule:
+      repeat: true
+runs:
+- name: eo_f0_n06_min_latency_hpa_coupled
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: true
+      periodic_replan: true
+- name: eo_f0_n06_min_latency_hpa_periodic
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: true
+- name: eo_f0_n06_min_latency_hpa_fixed
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: false
+- name: eo_f0_n24_min_latency_hpa_coupled
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: true
+      periodic_replan: true
+    infrastructure:
+      n_space: 2
+      n_iot: 6
+      n_edge: 12
+      n_cloud: 4
+- name: eo_f0_n24_min_latency_hpa_periodic
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: true
+    infrastructure:
+      n_space: 2
+      n_iot: 6
+      n_edge: 12
+      n_cloud: 4
+- name: eo_f0_n24_min_latency_hpa_fixed
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: false
+    infrastructure:
+      n_space: 2
+      n_iot: 6
+      n_edge: 12
+      n_cloud: 4
+- name: eo_f0_n48_min_latency_hpa_coupled
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: true
+      periodic_replan: true
+    infrastructure:
+      n_space: 4
+      n_iot: 12
+      n_edge: 24
+      n_cloud: 8
+- name: eo_f0_n48_min_latency_hpa_periodic
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: true
+    infrastructure:
+      n_space: 4
+      n_iot: 12
+      n_edge: 24
+      n_cloud: 8
+- name: eo_f0_n48_min_latency_hpa_fixed
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: false
+    infrastructure:
+      n_space: 4
+      n_iot: 12
+      n_edge: 24
+      n_cloud: 8
+- name: eo_f0_n06_best_fit_hpa_coupled
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    placement:
+      strategy: best_fit
+      replan_on_scale: true
+      periodic_replan: true
+- name: eo_f0_n06_best_fit_hpa_periodic
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    placement:
+      strategy: best_fit
+      replan_on_scale: false
+      periodic_replan: true
+- name: eo_f0_n06_best_fit_hpa_fixed
+  controller: hpa
+  config: configs/eo_small.yaml
+  overrides:
+    placement:
+      strategy: best_fit
+      replan_on_scale: false
+      periodic_replan: false
+- name: eo_f0_n06_min_latency_separated_loops_coupled
+  controller: separated_loops
+  config: configs/eo_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: true
+      periodic_replan: true
+- name: eo_f0_n06_min_latency_separated_loops_periodic
+  controller: separated_loops
+  config: configs/eo_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: true
+- name: eo_f0_n06_min_latency_separated_loops_fixed
+  controller: separated_loops
+  config: configs/eo_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: false
+- name: eo_f2_n06_min_latency_hpa_coupled
+  controller: hpa
+  config: configs/eo_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: true
+      periodic_replan: true
+- name: eo_f2_n06_min_latency_hpa_periodic
+  controller: hpa
+  config: configs/eo_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: true
+- name: eo_f2_n06_min_latency_hpa_fixed
+  controller: hpa
+  config: configs/eo_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: false
+- name: driving_f0_n06_min_latency_hpa_coupled
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: true
+      periodic_replan: true
+- name: driving_f0_n06_min_latency_hpa_periodic
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: true
+- name: driving_f0_n06_min_latency_hpa_fixed
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: false
+- name: driving_f0_n24_min_latency_hpa_coupled
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: true
+      periodic_replan: true
+    infrastructure:
+      n_space: 2
+      n_iot: 6
+      n_edge: 12
+      n_cloud: 4
+- name: driving_f0_n24_min_latency_hpa_periodic
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: true
+    infrastructure:
+      n_space: 2
+      n_iot: 6
+      n_edge: 12
+      n_cloud: 4
+- name: driving_f0_n24_min_latency_hpa_fixed
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: false
+    infrastructure:
+      n_space: 2
+      n_iot: 6
+      n_edge: 12
+      n_cloud: 4
+- name: driving_f0_n48_min_latency_hpa_coupled
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: true
+      periodic_replan: true
+    infrastructure:
+      n_space: 4
+      n_iot: 12
+      n_edge: 24
+      n_cloud: 8
+- name: driving_f0_n48_min_latency_hpa_periodic
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: true
+    infrastructure:
+      n_space: 4
+      n_iot: 12
+      n_edge: 24
+      n_cloud: 8
+- name: driving_f0_n48_min_latency_hpa_fixed
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: false
+    infrastructure:
+      n_space: 4
+      n_iot: 12
+      n_edge: 24
+      n_cloud: 8
+- name: driving_f0_n06_best_fit_hpa_coupled
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    placement:
+      strategy: best_fit
+      replan_on_scale: true
+      periodic_replan: true
+- name: driving_f0_n06_best_fit_hpa_periodic
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    placement:
+      strategy: best_fit
+      replan_on_scale: false
+      periodic_replan: true
+- name: driving_f0_n06_best_fit_hpa_fixed
+  controller: hpa
+  config: configs/driving_small.yaml
+  overrides:
+    placement:
+      strategy: best_fit
+      replan_on_scale: false
+      periodic_replan: false
+- name: driving_f0_n06_min_latency_separated_loops_coupled
+  controller: separated_loops
+  config: configs/driving_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: true
+      periodic_replan: true
+- name: driving_f0_n06_min_latency_separated_loops_periodic
+  controller: separated_loops
+  config: configs/driving_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: true
+- name: driving_f0_n06_min_latency_separated_loops_fixed
+  controller: separated_loops
+  config: configs/driving_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: false
+- name: driving_f2_n06_min_latency_hpa_coupled
+  controller: hpa
+  config: configs/driving_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: true
+      periodic_replan: true
+- name: driving_f2_n06_min_latency_hpa_periodic
+  controller: hpa
+  config: configs/driving_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: true
+- name: driving_f2_n06_min_latency_hpa_fixed
+  controller: hpa
+  config: configs/driving_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: false
+- name: split_f0_n06_min_latency_hpa_coupled
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: true
+      periodic_replan: true
+- name: split_f0_n06_min_latency_hpa_periodic
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: true
+- name: split_f0_n06_min_latency_hpa_fixed
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: false
+- name: split_f0_n24_min_latency_hpa_coupled
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: true
+      periodic_replan: true
+    infrastructure:
+      n_iot: 6
+      n_edge: 12
+      n_cloud: 4
+- name: split_f0_n24_min_latency_hpa_periodic
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: true
+    infrastructure:
+      n_iot: 6
+      n_edge: 12
+      n_cloud: 4
+- name: split_f0_n24_min_latency_hpa_fixed
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: false
+    infrastructure:
+      n_iot: 6
+      n_edge: 12
+      n_cloud: 4
+- name: split_f0_n48_min_latency_hpa_coupled
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: true
+      periodic_replan: true
+    infrastructure:
+      n_iot: 12
+      n_edge: 24
+      n_cloud: 8
+- name: split_f0_n48_min_latency_hpa_periodic
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: true
+    infrastructure:
+      n_iot: 12
+      n_edge: 24
+      n_cloud: 8
+- name: split_f0_n48_min_latency_hpa_fixed
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: false
+    infrastructure:
+      n_iot: 12
+      n_edge: 24
+      n_cloud: 8
+- name: split_f0_n06_best_fit_hpa_coupled
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    placement:
+      strategy: best_fit
+      replan_on_scale: true
+      periodic_replan: true
+- name: split_f0_n06_best_fit_hpa_periodic
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    placement:
+      strategy: best_fit
+      replan_on_scale: false
+      periodic_replan: true
+- name: split_f0_n06_best_fit_hpa_fixed
+  controller: hpa
+  config: configs/split_inference_small.yaml
+  overrides:
+    placement:
+      strategy: best_fit
+      replan_on_scale: false
+      periodic_replan: false
+- name: split_f0_n06_min_latency_separated_loops_coupled
+  controller: separated_loops
+  config: configs/split_inference_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: true
+      periodic_replan: true
+- name: split_f0_n06_min_latency_separated_loops_periodic
+  controller: separated_loops
+  config: configs/split_inference_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: true
+- name: split_f0_n06_min_latency_separated_loops_fixed
+  controller: separated_loops
+  config: configs/split_inference_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: false
+- name: split_f2_n06_min_latency_hpa_coupled
+  controller: hpa
+  config: configs/split_inference_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: true
+      periodic_replan: true
+- name: split_f2_n06_min_latency_hpa_periodic
+  controller: hpa
+  config: configs/split_inference_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: true
+- name: split_f2_n06_min_latency_hpa_fixed
+  controller: hpa
+  config: configs/split_inference_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: false
+- name: industrial_f0_n06_min_latency_hpa_coupled
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: true
+      periodic_replan: true
+- name: industrial_f0_n06_min_latency_hpa_periodic
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: true
+- name: industrial_f0_n06_min_latency_hpa_fixed
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: false
+- name: industrial_f0_n24_min_latency_hpa_coupled
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: true
+      periodic_replan: true
+    infrastructure:
+      n_iot: 6
+      n_edge: 12
+      n_cloud: 4
+- name: industrial_f0_n24_min_latency_hpa_periodic
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: true
+    infrastructure:
+      n_iot: 6
+      n_edge: 12
+      n_cloud: 4
+- name: industrial_f0_n24_min_latency_hpa_fixed
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: false
+    infrastructure:
+      n_iot: 6
+      n_edge: 12
+      n_cloud: 4
+- name: industrial_f0_n48_min_latency_hpa_coupled
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: true
+      periodic_replan: true
+    infrastructure:
+      n_iot: 12
+      n_edge: 24
+      n_cloud: 8
+- name: industrial_f0_n48_min_latency_hpa_periodic
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: true
+    infrastructure:
+      n_iot: 12
+      n_edge: 24
+      n_cloud: 8
+- name: industrial_f0_n48_min_latency_hpa_fixed
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: false
+    infrastructure:
+      n_iot: 12
+      n_edge: 24
+      n_cloud: 8
+- name: industrial_f0_n06_best_fit_hpa_coupled
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    placement:
+      strategy: best_fit
+      replan_on_scale: true
+      periodic_replan: true
+- name: industrial_f0_n06_best_fit_hpa_periodic
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    placement:
+      strategy: best_fit
+      replan_on_scale: false
+      periodic_replan: true
+- name: industrial_f0_n06_best_fit_hpa_fixed
+  controller: hpa
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    placement:
+      strategy: best_fit
+      replan_on_scale: false
+      periodic_replan: false
+- name: industrial_f0_n06_min_latency_separated_loops_coupled
+  controller: separated_loops
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: true
+      periodic_replan: true
+- name: industrial_f0_n06_min_latency_separated_loops_periodic
+  controller: separated_loops
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: true
+- name: industrial_f0_n06_min_latency_separated_loops_fixed
+  controller: separated_loops
+  config: configs/industrial_iot_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: false
+- name: industrial_f2_n06_min_latency_hpa_coupled
+  controller: hpa
+  config: configs/industrial_iot_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: true
+      periodic_replan: true
+- name: industrial_f2_n06_min_latency_hpa_periodic
+  controller: hpa
+  config: configs/industrial_iot_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: true
+- name: industrial_f2_n06_min_latency_hpa_fixed
+  controller: hpa
+  config: configs/industrial_iot_trace_small.yaml
+  overrides:
+    placement:
+      strategy: min_latency
+      replan_on_scale: false
+      periodic_replan: false
