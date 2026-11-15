@@ -29,11 +29,13 @@ if not _HAS_ECLYPSE:
         "test_cli.py",
         "test_cli_smoke.py",
         "test_contact_schedule.py",
+        "test_intra_tier_links.py",
         "test_placement_strategies.py",
         "test_realism_tiers.py",
         "test_runner_integration.py",
         "test_scenarios.py",
         "test_skeleton_service.py",
+        "test_slo_discarded_work.py",
         "test_sweeps.py",
         "test_worker_pool_scaling.py",
     ]
