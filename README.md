@@ -266,7 +266,7 @@ If you use ContinuumBench, please cite the ContinuumBench paper. If you use the 
 @inproceedings{li2026intentcompiler,
   title         = {Continual Instruction Tuning for {LLM}-based Management of Continuum Resources},
   author        = {Li, Lanpei and Vaccarella, Antonino and Lomonaco, Vincenzo and Coppola, Massimo},
-  booktitle     = {Companion Proceedings of the 16th International Conference on the Internet of Things (IoT 2026), Workshop on Research and Innovation in Scalable and Efficient Deep Learning (RISE-DL 2026)},
+  booktitle     = {The 16th International Conference on the Internet of Things (IOT 2026)},
   publisher     = {ACM},
   year          = {2026},
   doi           = {10.1145/3860552.3860597},
