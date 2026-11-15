@@ -185,6 +185,10 @@ class ContinuumBenchRunner:
         self._node_failure_policy = NodeFailureAvailabilityUpdatePolicy()
         self._install_failure_update_policy()
         self._failure_failed_tasks_this_epoch = 0
+        # Tasks lost outside a buffer: in transit to a failed node, or on a hop that has no
+        # buffer. Buffer losses are collected from each buffer's ``discarded`` list; both feed
+        # the SLO horizon, so discarded work counts as missed.
+        self._failure_lost_tasks: List[Task] = []
 
         self.worker_pool_manager = WorkerPoolManager(
             application=self.application,
@@ -826,6 +830,7 @@ class ContinuumBenchRunner:
             target_node = self.placement.get(message.target_stage)
             if target_node is not None and self._is_node_down(target_node):
                 self._failure_failed_tasks_this_epoch += 1
+                self._failure_lost_tasks.append(message.task)
                 continue
             self._add_task_delay(
                 message.task,
@@ -903,7 +908,14 @@ class ContinuumBenchRunner:
                         )
                         continue
 
-                    delay_epochs = self._latency_to_epochs(latency_ms)
+                    # Match the fresh-send path: size-aware route cost, so a buffered
+                    # item's transfer time scales with payload and link rate instead of
+                    # depending on latency alone.
+                    delay_epochs = (
+                        self._message_delay_epochs(stage_id, resolved_target_id, task, latency_ms)
+                        if isinstance(task, Task)
+                        else self._latency_to_epochs(latency_ms)
+                    )
                     if isinstance(task, Task):
                         task.transport_entered_time_s = epoch * self.step_seconds
                     self.inflight.append(
@@ -1048,7 +1060,12 @@ class ContinuumBenchRunner:
             eligible_by_priority[task.priority] = eligible_by_priority.get(task.priority, 0) + 1
 
         seen_task_ids = set()
-        for task in self._horizon_unfinished_tasks():
+        # Work still in the system, plus work the run destroyed (buffer overflow, TTL
+        # expiry, retry exhaustion, node outage, a hop without a buffer). Both are equally
+        # "not delivered on time": counting only the former let a controller improve its SLO
+        # rate by discarding tasks, since a discarded task left the queues/buffers/inflight
+        # sets and so was never eligible.
+        for task in self._horizon_unfinished_tasks() + self._horizon_lost_tasks():
             if task.task_id in seen_task_ids or task.created_time_s + deadline_s > run_end_time_s:
                 continue
             seen_task_ids.add(task.task_id)
@@ -1081,6 +1098,24 @@ class ContinuumBenchRunner:
                             tasks.append(task)
         for message in self.inflight:
             tasks.append(message.task)
+        return tasks
+
+    def _horizon_lost_tasks(self) -> List[Task]:
+        """Collect tasks the run destroyed rather than delivered.
+
+        Covers every buffer loss path (overflow rejection, eviction, retry exhaustion,
+        TTL expiry), tasks lost in transit to a node outage, and tasks sent on a hop that
+        has no buffer.
+        """
+
+        tasks: List[Task] = list(self._failure_lost_tasks)
+        for runtime in self.stage_runtimes.values():
+            for buffer in runtime.buffers.values():
+                for item in buffer.discarded:
+                    payload = item.data
+                    task = payload.get("task") if isinstance(payload, dict) else payload
+                    if isinstance(task, Task):
+                        tasks.append(task)
         return tasks
 
     def _route_task(self, stage_id: str, task: Task, epoch: int) -> None:
@@ -1130,7 +1165,13 @@ class ContinuumBenchRunner:
                 usage_key = (epoch, self._bandwidth_budget_key(src_stage, dst_stage))
                 bytes_sent = self._link_bytes_sent_this_epoch.get(usage_key, 0)
                 if bytes_sent + task.size_bytes > max_bytes:
-                    available = False
+                    # A message larger than one epoch's budget fails this test in every
+                    # epoch and stalls forever. Admit it alone on an otherwise idle link;
+                    # its serialization time is carried by the transfer delay below.
+                    if bytes_sent == 0 and task.size_bytes > max_bytes:
+                        self._link_bytes_sent_this_epoch[usage_key] = task.size_bytes
+                    else:
+                        available = False
                 else:
                     self._link_bytes_sent_this_epoch[usage_key] = bytes_sent + task.size_bytes
 
@@ -1150,6 +1191,10 @@ class ContinuumBenchRunner:
         runtime = self.stage_runtimes[src_stage]
         buffer = runtime.buffers.get(dst_stage)
         if buffer is None:
+            # No buffer exists for this hop, so the task cannot be retried and is lost here.
+            # Record it, so that the loss counts as a failure and as an SLO violation.
+            self._failure_lost_tasks.append(task)
+            self._failure_failed_tasks_this_epoch += 1
             return
 
         payload = {

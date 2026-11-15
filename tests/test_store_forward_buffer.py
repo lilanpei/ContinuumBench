@@ -89,3 +89,49 @@ def test_drop_oldest_low_rejects_lower_priority_item_before_evicting_higher_prio
     assert accepted is False
     assert [item.data["id"] for item in items] == ["high"]
     assert buffer.stats["items_dropped"] == 1
+
+
+def test_oversized_item_is_released_instead_of_stalling_forever():
+    """An item bigger than the whole per-epoch budget must still make progress.
+
+    Without head-of-line unblocking, ``bytes_retrieved + size > max_bytes`` would hold in
+    every epoch for such an item, so it would never be dequeued and the transfer would stall
+    silently (no error, no drop: the task would never arrive).
+    """
+
+    clock = ManualClock()
+    buffer = StoreForwardBuffer(max_items=16, time_fn=clock.now)
+    buffer.enqueue(data={"id": "huge"}, priority=BufferPriority.NORMAL, size_bytes=100, ttl=10.0)
+
+    items = buffer.dequeue(max_bytes=10)  # budget far smaller than the item
+
+    assert [item.data["id"] for item in items] == ["huge"]
+    assert buffer.size == 0
+
+
+def test_oversized_item_does_not_drag_extra_items_past_the_budget():
+    """Head-of-line unblocking releases the oversized item *alone*, not a free-for-all."""
+
+    clock = ManualClock()
+    buffer = StoreForwardBuffer(max_items=16, time_fn=clock.now)
+    buffer.enqueue(data={"id": "huge"}, priority=BufferPriority.NORMAL, size_bytes=100, ttl=10.0)
+    buffer.enqueue(data={"id": "next"}, priority=BufferPriority.NORMAL, size_bytes=1, ttl=10.0)
+
+    items = buffer.dequeue(max_bytes=10)
+
+    assert [item.data["id"] for item in items] == ["huge"]
+    assert buffer.size == 1
+
+
+def test_items_within_budget_are_unaffected():
+    """Items that fit keep the original semantics: fill up to the budget, then stop."""
+
+    clock = ManualClock()
+    buffer = StoreForwardBuffer(max_items=16, time_fn=clock.now)
+    for idx in range(4):
+        buffer.enqueue(data={"id": str(idx)}, priority=BufferPriority.NORMAL, size_bytes=4, ttl=10.0)
+
+    items = buffer.dequeue(max_bytes=10)  # fits two 4-byte items, not three
+
+    assert [item.data["id"] for item in items] == ["0", "1"]
+    assert buffer.size == 2
