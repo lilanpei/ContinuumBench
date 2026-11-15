@@ -21,4 +21,4 @@ Current canonical docs:
 - `configs/README.md`, `sweeps/README.md`, `analysis/README.md`, and `tests/README.md` for runnable protocols, aggregation, and verification
 - `calibration/README.md` and `src/continuum_bench/calibration/README.md` for calibration assets, packaged contact traces, and runtime contact semantics
 
-Only tracked, linked documents in this index are project truth. If you keep local design notes or paper drafts under `docs/`, treat them as scratch material and check the tracked READMEs and live configs before relying on them.
+Only the tracked documents linked from this index describe the benchmark. Treat any local notes under `docs/` as drafts, and check them against the tracked READMEs and configs.
