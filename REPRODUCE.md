@@ -16,10 +16,11 @@ Version 1.1 changes some simulator behavior for the intent-compiler paper (see
 [CHANGELOG.md](CHANGELOG.md), 1.1.0). On `main`, every table and finding gives the values of
 version 1.0.1 except two that rest on the MILP:
 
-- Finding 1: the MILP re-planner gains nothing from re-planning. In version 1.1, an autoscaler
-  whose new workers do not fit around a fixed placement re-solves the placement instead of
-  deferring the scale-up, so the schedule without re-planning scales as the re-planning one does
-  and reaches the same completion, 0.255.
+- Finding 1: the MILP re-planner gains nothing from re-planning. In version 1.1 the MILP places
+  unanchored stages on edge and cloud nodes only, so the new workers of a scale-up almost always
+  fit around a fixed placement, and an autoscaler whose new workers still do not fit re-solves the
+  placement instead of deferring the scale-up. Either change alone removes the gain: the schedule
+  without re-planning scales as the re-planning one does and reaches the same completion, 0.255.
 - Finding 3: on the placement-stress variant the MILP, which in version 1.1 places unanchored
   stages on edge and cloud nodes only, ties with the best strategies, so on-time delivery spreads
   the six strategies by 0.41.
