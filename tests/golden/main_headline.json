@@ -1,6 +1,6 @@
 {
-  "_comment": "Frozen headline numbers underlying Table 1 + score robustness. Regenerate with the same command if the sweep/code legitimately changes. Pins values so code changes cannot silently shift the paper.",
-  "table1_cells": [
+  "_comment": "Frozen headline numbers behind Table 3 of the paper (the main comparison) and its score-robustness check. Regenerate them with the same commands if a sweep or code change legitimately moves them; they pin the values so that a code change cannot silently shift the paper.",
+  "table3_cells": [
     {
       "scenario": "eo_dual_stream",
       "realism_tier": "T0",

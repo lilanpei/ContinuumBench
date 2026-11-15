@@ -1,0 +1,93 @@
+# Control for the placement-stress variant (configs/eo_placement_stress.yaml).
+#
+# The same as the variant, except for the CPU, the edge-cloud link and the source frames, which take
+# the values of configs/eo_small.yaml: a 128-core cloud node and 24-core edge nodes, a 20 ms, 1 Gbps
+# edge-cloud link, and frames of 800 KB and 80 KB. The load, the 12 s sink deadline, the four fixed
+# workers and the horizon are the variant's. If the placement strategies converge here but spread
+# under stress, the spread comes from the placement bottleneck.
+
+scenario: eo_dual_stream
+realism_tier: T0
+epochs: 60
+step_seconds: 1.0
+drain_epochs: 30
+
+scenario_config:
+  application_id: EO_PlacementControl
+
+infrastructure:
+  infrastructure_id: eo_control_infra
+  n_space: 1
+  n_iot: 2
+  n_edge: 2
+  n_cloud: 1
+  cloud:
+    cpu: 128.0
+    ram: 256.0
+    storage: 10000.0
+  edge:
+    cpu: 24.0
+    ram: 64.0
+    storage: 2000.0
+  edge_to_cloud:
+    latency: 20.0
+    bandwidth: 1000.0
+  contact_schedule:
+    mode: periodic
+    period_s: 20
+    on_duration_s: 6
+    up_bandwidth_mbps: 45
+    down_bandwidth_mbps: 0
+    repeat: true
+  # The edge nodes share a LAN, as in the scenario configs.
+  intra_tier:
+    edge: {latency: 1.0, bandwidth: 10000.0}
+
+workload:
+  repeat: true
+  streams:
+    SpaceSource:
+      generator: piecewise
+      segments:
+        - epochs: 10
+          rate: 0.6
+        - epochs: 25
+          rate: 1.2
+        - epochs: 25
+          rate: 0.8
+    IoTSource:
+      generator: piecewise
+      segments:
+        - epochs: 20
+          rate: 1.0
+        - epochs: 20
+          rate: 1.5
+        - epochs: 20
+          rate: 1.0
+
+stages:
+  SpaceSource:
+    output_size_bytes: 800000
+  IoTSource:
+    output_size_bytes: 80000
+  Sink:
+    deadline_s: 12.0
+
+scaling:
+  pools:
+    BulkPath:
+      min_workers: 4
+      initial_workers: 4
+      max_workers: 4
+  queue_up_threshold: 18
+  queue_down_threshold: 4
+  age_up_threshold_s: 18
+  age_down_threshold_s: 4
+  ttl_pressure_up_threshold: 0.25
+  ttl_pressure_down_threshold: 0.08
+  cooldown_epochs: 2
+  scale_step: 1
+
+placement:
+  strategy: min_latency
+  place_every_epochs: 2

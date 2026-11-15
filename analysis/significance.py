@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Paired significance test for the main controller comparison (reproduces the paper's Wilcoxon result).
+"""Paired significance tests for the main controller comparison.
 
-For each scenario/regime cell of the main comparison, this pairs the selected scale-capable controller
-(HPA) against the matched placement-only controller per seed and runs a one-sided paired Wilcoxon
-signed-rank test on completion (H1: scale-capable >= placement-only) and SLO violation
-(H1: scale-capable <= placement-only). It reports per-cell p-values and how many of the eight cells are
-significant at p<0.05, matching the claim in the Results section.
+An additional check, not reported in the ContinuumBench paper.
+
+For each scenario/regime cell of the main comparison, this pairs the selected scale-capable
+controller (HPA) against the matched placement-only controller per seed and runs a one-sided paired
+Wilcoxon signed-rank test on completion (H1: scale-capable >= placement-only) and SLO violation
+(H1: scale-capable <= placement-only). It reports per-cell p-values and how many of the eight cells
+are significant at p<0.05.
 
 Usage:
     python analysis/significance.py --aggregate-csv runs/main/analysis/aggregate.csv \
@@ -22,7 +24,8 @@ from pathlib import Path
 
 from scipy.stats import wilcoxon
 
-# Scale-capable controller and the matched placement-only controller per (scenario, regime), per Table 1.
+# Scale-capable controller and the matched placement-only controller per (scenario, regime), as in
+# Table 3 of the paper.
 SCALE_CAPABLE = "hpa"
 MATCHED_PLACEMENT = {
     ("eo_dual_stream", "F0"): "placement_only:milp",
@@ -119,8 +122,8 @@ def main() -> None:
     print(
         f"Paired Wilcoxon (one-sided, {result['cells'][0]['n_seeds']} seeds): "
         f"SLO reduction significant in {result['slo_significant']}/{result['n_cells']} cells; "
-        f"completion improvement significant in {result['completion_significant']}/{result['n_cells']} "
-        f"cells (alpha={args.alpha})."
+        f"completion improvement significant in "
+        f"{result['completion_significant']}/{result['n_cells']} cells (alpha={args.alpha})."
     )
     for cell in result["cells"]:
         print(
