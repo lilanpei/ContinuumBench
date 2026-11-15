@@ -1,9 +1,8 @@
 # Analysis Pipeline
 
-> **Reproducing the ContinuumBench paper** (on the branch `europar-frame-2026`)**:** use `sweeps/main.yaml` (main comparison) plus the
-> `realism_ladder`, `sensitivity_*`, `delay_breakdown`, and `milp_reference`
-> manifests, then `aggregate_runs.py` -> `tables.py` -> `figures.py`. See
-> [`../REPRODUCE.md`](../REPRODUCE.md) for the artifact-to-command map.
+> **Reproducing the ContinuumBench paper:** use the tag `v1.0.1-europar-frame`, whose
+> REPRODUCE.md maps each table and finding to its sweep and gives the values to expect;
+> `make reproduce` runs the sweeps, aggregates them and prints the numbers with `findings.py`.
 
 ## Purpose
 
@@ -15,6 +14,8 @@ This directory contains the file-based aggregation and plotting steps used to tu
 - `tables.py`: builds grouped and completion-aware ranking CSVs from `aggregate.csv`.
 - `figures.py`: renders the publication figures from grouped analysis CSVs.
 - `score_sensitivity.py`: perturbs completion-aware score weights and reports whether the family-level comparison changes.
+- `findings.py`: prints the numbers of the paper's Table 3, its Findings 1 to 4 and the stressor rank changes, one subcommand per result, from the run directories of a sweep.
+- `significance.py`: paired Wilcoxon tests of the main comparison (not reported in the paper).
 - `README.md`: documents the expected inputs, outputs, and offline analysis workflow.
 
 ## When To Read This
@@ -73,30 +74,25 @@ The ranking table is completion-aware. A controller with very low completion can
 The composite completion-aware score also penalizes pending work, so horizon-unfinished tasks remain visible instead of being silently treated as successes or failures.
 Use `score_sensitivity.py` to check whether the score-selected controller families remain stable under reasonable weight perturbations before using score-selected summaries.
 
-## Publication Sweep Family
+## The Paper's Numbers
 
-Use the newer sweep family for the current experiment suite:
-
-- `sweeps/sota_pilot.yaml`: 3-seed pilot over the full baseline family, including `rl_meta`.
-- `sweeps/main.yaml`: 10-seed main matrix over four scenarios, F0/F2 endpoints, and nine controller variants, including the rule-based meta-policy controller and a solver-backed MILP placement reference.
-- `sweeps/realism_ladder.yaml`: legacy-named evaluation-regime and overlay ablation covering the old T0--T4 compatibility labels.
-- `sweeps/sensitivity_load.yaml`: arrival-rate sensitivity.
-- `sweeps/sensitivity_failure.yaml`: node-failure sensitivity.
-- `sweeps/sensitivity_contact.yaml`: contact-trace sensitivity for EO and Driving V2X, the scenarios whose workflows contain explicit intermittent boundaries.
-- `sweeps/delay_breakdown.yaml`: per-cause completed-task delay attribution for F2 HPA and joint-control runs.
-- `sweeps/milp_reference.yaml`: compact F2 solver-backed static placement reference.
-
-Recommended workflow:
+[`../sweeps/README.md`](../sweeps/README.md) lists the sweeps. After running them, aggregate the
+main comparison, then print each result:
 
 ```bash
-python -m continuum_bench.cli sweep --manifest sweeps/main.yaml --out runs/main
 python analysis/aggregate_runs.py --sweep-dir runs/main --out runs/main/analysis
 python analysis/tables.py --aggregate-csv runs/main/analysis/aggregate.csv --out runs/main/analysis
-python analysis/score_sensitivity.py --grouped-csv runs/main/analysis/grouped_strict.csv --out runs/main/analysis/score_sensitivity.json
+python analysis/score_sensitivity.py --grouped-csv runs/main/analysis/grouped_strict.csv
+python analysis/findings.py main --sweep-dir runs/main
+python analysis/findings.py replan --sweep-dir runs/replan_ablation
 ```
 
-Run `realism_ladder` and the sensitivity sweeps the same way. Interpret `main` as controller-comparison evidence and the evaluation-regime, overlay, and sensitivity sweeps as benchmark-validity evidence.
+`findings.py` reads each run's `summary.json` and the `provenance/` files that the sweep runner
+stores beside it, so it needs no aggregate. Its other subcommands are `replan-milp`, `load`,
+`placement`, `failure` and `stressors` (`make findings` runs them all). Interpret `main` as
+controller-comparison evidence and the regime, overlay and sensitivity sweeps as benchmark-validity
+evidence.
 
-Current publication sweeps use a longer completion-aware horizon: `epochs` is the source-arrival window and `drain_epochs` keeps the runtime active without generating new work. The main, evaluation-regime, and sensitivity manifests use `epochs: 120` and `drain_epochs: 60`; the SOTA pilot uses `80 + 40` for a faster sanity check. These manifests repeat finite piecewise workload regimes, and repeat contact traces when a scenario has an intermittent workflow boundary, so longer contact-aware runs do not fall into a permanent post-trace no-contact state.
+Current publication sweeps use a longer completion-aware horizon: `epochs` is the source-arrival window and `drain_epochs` keeps the runtime active without generating new work. The paper's manifests use `epochs: 120` and `drain_epochs: 60`, except the placement-stress variant and its control, which keep their own `60 + 30`; the SOTA pilot uses `80 + 40` for a faster sanity check. These manifests repeat finite piecewise workload regimes, and repeat contact traces when a scenario has an intermittent workflow boundary, so longer contact-aware runs do not fall into a permanent post-trace no-contact state.
 
 When protocol settings change, delete the old run directory and rerun. The analysis code intentionally does not preserve compatibility with old erroneous run artifacts.

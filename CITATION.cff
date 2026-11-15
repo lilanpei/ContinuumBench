@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use ContinuumBench, please cite the ContinuumBench paper. If you use the knob interface or the intent-compiler scenario variants (version 1.1), please also cite the intent-compiler paper."
 title: "ContinuumBench"
 type: software
-version: 1.1.0
-date-released: 2026-11-13
+version: 1.1.1
+date-released: 2026-11-15
 license: MIT
 repository-code: "https://github.com/lilanpei/ContinuumBench"
 authors:

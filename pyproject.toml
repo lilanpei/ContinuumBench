@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "continuum-bench"
-version = "1.1.0"
+version = "1.1.1"
 description = "Reproducible continuum placement and autoscaling benchmarks with intermittent links"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -25,6 +25,8 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering",
 ]
 # Reproducibility: the ContinuumBench paper experiments use eclypse 0.8.1 (commit 73806b7),

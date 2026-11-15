@@ -1,0 +1,11 @@
+runs/
+figs/
+.venv/
+eclypse/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.DS_Store

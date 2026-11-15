@@ -33,10 +33,10 @@ ContinuumBench is ECLYPSE-native by default: application graphs, infrastructure 
 
 | Version | Where | Paper |
 |---|---|---|
-| 1.0 | branch `europar-frame-2026`, tag `v1.0-europar-frame` | [ContinuumBench: Benchmarking Joint Autoscaling and Placement Across Evaluation Regimes in the Cloud-Edge Continuum](https://arxiv.org/abs/2609.08946) (FRAME 2026 at Euro-Par 2026) |
-| 1.1 | branch `main`, tag `v1.1.0` | [Continual Instruction Tuning for LLM-based Management of Continuum Resources](https://arxiv.org/abs/2611.10292) (RISE-DL 2026 at IoT 2026) |
+| 1.0 | branch `europar-frame-2026`, tag `v1.0.1-europar-frame` | [ContinuumBench: Benchmarking Joint Autoscaling and Placement Across Evaluation Regimes in the Cloud-Edge Continuum](https://arxiv.org/abs/2609.08946) (FRAME 2026 at Euro-Par 2026) |
+| 1.1 | branch `main`, tags `v1.1.0` and `v1.1.1` | [Continual Instruction Tuning for LLM-based Management of Continuum Resources](https://arxiv.org/abs/2611.10292) (RISE-DL 2026 at IoT 2026) |
 
-This README calls them the ContinuumBench paper and the intent-compiler paper. The second trains an intent compiler, a language model that translates a management intent in natural language into the parameters of a controller. Version 1.1 adds three scenario variants, the controllers they use, and a knob interface through which an intent compiler sets the controller's parameters. It also changes some simulator behavior and accounting (see [CHANGELOG.md](CHANGELOG.md)), so the ContinuumBench paper's results come from version 1.0. The intent compiler itself, its data and its trained adapters are in the companion repository [continuum-intent-compiler](https://github.com/lilanpei/continuum-intent-compiler).
+This README calls them the ContinuumBench paper and the intent-compiler paper. The second trains an intent compiler, a language model that translates a management intent in natural language into the parameters of a controller. Version 1.1 adds three scenario variants, the controllers they use, and a knob interface through which an intent compiler sets the controller's parameters. It also changes some simulator behavior (see [CHANGELOG.md](CHANGELOG.md)), so the ContinuumBench paper's results come from version 1.0.1, on the branch `europar-frame-2026`. Version 1.1.1 brings the ContinuumBench paper's scenario configs, sweeps and analysis in line with version 1.0.1. The intent compiler itself, its data and its trained adapters are in the companion repository [continuum-intent-compiler](https://github.com/lilanpei/continuum-intent-compiler).
 
 ## Install
 
@@ -58,7 +58,7 @@ export ECLYPSE_HOME=/path/to/eclypse
 `PyYAML` and `loguru` are installed with this package; the `milp` extra adds `scipy`/`numpy`, the
 `figures` extra adds `matplotlib`, and the `dev` extra adds `pytest` for the test suite. `eclypse`
 is intentionally treated as an external substrate dependency. To pin the exact versions of
-`requirements-lock.txt`, run `pip install -r requirements-lock.txt` before the commands above. See **[REPRODUCE.md](REPRODUCE.md)** to regenerate the ContinuumBench paper's tables and figures.
+`requirements-lock.txt`, run `pip install -r requirements-lock.txt` before the commands above. See **[REPRODUCE.md](REPRODUCE.md)** to regenerate the ContinuumBench paper's tables and findings.
 
 ## What This Repo Contains
 
@@ -117,6 +117,10 @@ Scenario variants of the intent-compiler paper (version 1.1), each built on `eo_
 - `configs/eo_placement_stress.yaml` (the placement variant): deciding where stages run; tight CPU and a thin edge-cloud link make placement the limiting constraint.
 - `configs/eo_two_pool.yaml` (the two-pool variant): deciding how a shared core budget is split between two worker pools.
 
+`configs/eo_placement_stress.yaml` is also the placement-stress variant of the ContinuumBench paper's Finding 3, which compares it with its control, `configs/eo_placement_control.yaml` (the CPU, the edge-cloud link and the frame sizes of `eo_small.yaml`).
+
+In the eight scenario configs, the placement-stress variant, its control and the two-pool variant, the edge nodes are linked directly over a LAN (1 ms, 10 Gbps; `infrastructure.intra_tier`). The elastic-bottleneck variant keeps the tiered graph alone, in which two edge nodes reach each other only through the cloud.
+
 Contact-aware trace-backed configs use packaged contact windows under
 `src/continuum_bench/calibration/contact_traces/`. Calibration-only configs of the trace-backed
 regime (F2, below) can instead select documented network or service-time profiles without adding
@@ -166,8 +170,10 @@ Added in version 1.1:
 - `constant`, `constant:N` or `constant:Fusion=2,BulkPath=6`: a reference controller that holds every pool, or each named pool, at a fixed size (a bare `constant` holds the pool maximum).
 
 The registry also accepts extreme/extra placement baselines (`static`, `no_scaling`, `all_local`,
-`all_edge`, `all_cloud`) used in supporting sweeps. To add your own controller, see
-[`src/continuum_bench/controllers/README.md`](src/continuum_bench/controllers/README.md).
+`all_edge`, `all_cloud`) used in supporting sweeps; `no_scaling` with every pool at its maximum is
+the over-provisioned reference of the load sweep. Any placement strategy can run as a
+placement-only controller, `placement_only:<strategy>`, as in the placement sweep. To add your own
+controller, see [`src/continuum_bench/controllers/README.md`](src/continuum_bench/controllers/README.md).
 
 ## Knob Interface
 
@@ -197,20 +203,21 @@ Epoch-level resource records expose both views:
 - `resources.active_runtime`: queue-weighted active runtime demand used by the benchmark loop.
 - the legacy top-level `resources.cpu`, `resources.ram`, `resources.storage`, and `resources.nodes` fields mirror `active_runtime` for backward-compatible analysis scripts.
 
-## Reproduce The ContinuumBench Paper
+## Reproduce The Papers
 
-Check out the branch `europar-frame-2026` first (the tag `v1.0-europar-frame` holds the same code, without the branch's corrected license holder and its test dependency `anyio`): version 1.1 changes some simulator behavior and accounting (see [CHANGELOG.md](CHANGELOG.md)). The intent-compiler paper is reproduced from the companion repository [continuum-intent-compiler](https://github.com/lilanpei/continuum-intent-compiler).
+Reproduce the ContinuumBench paper with version 1.0.1, the tag `v1.0.1-europar-frame` on the branch
+`europar-frame-2026`, whose **REPRODUCE.md** maps every table and finding to its sweep and gives the
+values to expect:
 
 ```bash
-make smoke       # fast end-to-end check (sota_pilot, 3 seeds; minutes)
-make reproduce   # full reproduction: all sweeps + analysis + figures (~1 CPU-hour)
+git checkout v1.0.1-europar-frame
+make reproduce   # the paper's sweeps, their aggregation, and every number
 make test        # regression suite, including the pinned headline numbers
 ```
 
-`make reproduce` writes the main comparison to `runs/main/analysis/grouped_strict.csv` and the
-figures to `figs/`. Override the interpreter, output root, or figure directory with
-`PY=`, `RUNS=`, `FIGS=`. **[REPRODUCE.md](REPRODUCE.md)** maps each paper artifact to the sweep
-manifest and command that produce it.
+`main` runs the same sweeps; **[REPRODUCE.md](REPRODUCE.md)** lists the two findings that differ in
+version 1.1. The intent-compiler paper is reproduced from the companion repository
+[continuum-intent-compiler](https://github.com/lilanpei/continuum-intent-compiler).
 
 ## Extend The Benchmark
 
@@ -229,8 +236,7 @@ pytest tests -q
 The suite is deterministic and fast. ECLYPSE-only tests are skipped automatically when `eclypse` is
 not importable, so a clean checkout without the substrate reports `passed`/`skipped` rather than
 collection errors. `tests/test_golden_headline.py` pins the ContinuumBench paper's headline numbers
-against `tests/golden/` when local run artifacts are present; produce those artifacts from the tag
-`v1.0-europar-frame`.
+against `tests/golden/` once `make reproduce` has produced `runs/main/analysis`.
 
 ## Output Files
 
@@ -241,6 +247,7 @@ Each run directory includes:
 - `decision_trajectory.jsonl`: epoch-level state, action, outcome, and reward records.
 - `epochs.csv`: compact epoch-level metrics.
 - `summary.json`: aggregate metrics for latency, throughput, SLOs, resource utilization, energy, reliability, freshness, buffering, churn, migrations, and controller overhead. Reliability reports completed, failed, and pending work together with completed-or-failed accounting so low completion cannot masquerade as a good latency result. With version 1.1, the summary also reports worker-seconds by tier and their tier-priced total, and the on-time rate of each task class.
+- `provenance/`: for a run of a sweep, the rendered configuration (`config.yaml`) and the manifest run and seed that produced it (`sweep.json`).
 
 ## Public Scope
 

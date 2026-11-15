@@ -2,35 +2,31 @@
 
 ## Purpose
 
-This directory contains benchmark sweep manifests.
+This directory contains the sweep manifests of the ContinuumBench paper. The paper's values come from version 1.0.1, the tag `v1.0.1-europar-frame`, whose REPRODUCE.md maps each table and finding to its manifest; see [REPRODUCE.md](../REPRODUCE.md) for how version 1.1 differs. The intent-compiler paper runs its experiments from the companion repository, so it has no manifest here.
 
 ## Key Files
 
-- `sota_pilot.yaml`: small SOTA-comparable pilot matrix used to check baseline coverage and metric coverage.
-- `main.yaml`: larger publication matrix over scenarios, F0/F2 endpoints, controller families including `rl_meta` and a solver-backed MILP placement reference, and 10 seeds.
-- `realism_ladder.yaml`: legacy-named evaluation-regime and overlay ablation using the old T0--T4 compatibility labels.
-- `sensitivity_load.yaml`: load-sensitivity protocol over F2 configs.
-- `sensitivity_contact.yaml`: contact-sensitivity protocol over the trace-backed EO and driving configs.
-- `sensitivity_failure.yaml`: node-failure-sensitivity protocol over base configs.
-- `delay_breakdown.yaml`: compact F2 sweep for per-cause completed-task delay components.
-- `milp_reference.yaml`: compact F2 solver-backed static placement reference.
+The paper's sweeps:
+- `main.yaml`: the main comparison, nine controllers on four scenarios under R1 and R2, ten seeds (720 runs; Table 3 and the score-robustness check).
+- `sensitivity_load.yaml`, `sensitivity_contact.yaml`, `sensitivity_failure.yaml`: one stressor at a time (arrival load, contact severity, node unavailability) for six controllers, three seeds (216, 108 and 216 runs; the stressor rank changes and Finding 4).
+- `replan_ablation.yaml`: three placement schedules over 24 configurations that vary the node count (each scenario's own and synthesized infrastructures of 22 to 48 nodes), the placement strategy, the controller and the regime, five seeds (360 runs; Finding 1).
+- `replan_milp.yaml`: the MILP re-planner that relocates workers, on EO with twice the load and 8-core edge nodes, with and without re-planning, 15 seeds (30 runs; Finding 1).
+- `load_sweep.yaml`: arrival rates from 0.6x to 2.0x under R1 for six controllers, including the over-provisioned reference, five seeds (480 runs; Finding 2).
+- `placement_sweep.yaml`: six placement strategies at fixed capacity on the placement-stress variant, its control and unmodified EO, five seeds (90 runs; Finding 3).
+
+Further sweeps, not reported in the paper:
+- `sota_pilot.yaml`: a small pilot matrix for checking a controller set end to end (`make smoke`).
+- `realism_ladder.yaml`: the evaluation regimes and overlays step by step, for ranking-sensitivity analysis.
+- `delay_breakdown.yaml`: a compact F2 sweep for per-cause delay components of completed tasks.
+- `milp_reference.yaml`: a compact F2 sweep of the MILP placement reference.
 
 ## When To Read This
 
 - when you need to run or extend a batch experiment
 - when you are deciding whether a change belongs in a single config or in a manifest-defined comparison set
 
-Current public sweep manifests:
-- `main.yaml`: full baseline-family publication matrix for main runs
-- `realism_ladder.yaml`: evaluation-regime and overlay ablation for ranking-sensitivity analysis
-- `sensitivity_load.yaml`: load stress sweep for dynamics validation
-- `sensitivity_contact.yaml`: contact stress sweep for dynamics validation
-- `sensitivity_failure.yaml`: failure stress sweep for dynamics validation
-- `delay_breakdown.yaml`: delay-cause sensitivity sweep
-- `milp_reference.yaml`: MILP placement-reference sweep
-
 What a sweep manifest does:
-- selects one base config
+- selects one base config, which a run can replace with its own `config`
 - optionally applies top-level overrides shared by every run, such as horizon length and repeat flags
 - selects a list of seeds
 - defines multiple named runs with controller choices and config overrides
@@ -41,27 +37,15 @@ Run a sweep with:
 python -m continuum_bench.cli sweep --manifest sweeps/main.yaml --out runs/main
 ```
 
-The sweep runner expands each manifest deterministically and writes one run directory per `(run, seed)` pair.
+The sweep runner expands each manifest deterministically and writes one run directory per `(run, seed)` pair. Each run directory keeps, under `provenance/`, the rendered config (`config.yaml`) and the manifest run and seed that produced it (`sweep.json`); the analysis scripts read them to tell apart runs that share a scenario and a controller.
 
-Artifact behavior:
-- recorded per-run configs are preserved as immutable provenance inside each run directory
-- nested/versioned sweep layouts are supported by the manifest path resolver
+Horizon policy:
+- The paper's sweeps use `epochs: 120` plus `drain_epochs: 60`, except the placement-stress variant and its control, which keep their own horizon of 60 plus 30 epochs.
+- `sota_pilot.yaml` uses `epochs: 80` plus `drain_epochs: 40` to keep pilot runs shorter.
+- The top-level `workload.repeat: true` repeats finite piecewise arrival regimes for the longer horizon.
+- The top-level `infrastructure.contact_schedule.repeat: true` repeats finite trace windows only when an expanded run already has a trace contact schedule.
 
 When adding new sweep manifests:
 - keep names study-specific and descriptive
 - prefer a small number of explicit runs over a huge opaque manifest
-- document the intended comparison set in the manifest comments or in `analysis/README.md`
-
-Publication use:
-- use `sota_pilot.yaml` to validate a proposed controller matrix, including the rule-based meta-policy controller, quickly
-- use `main.yaml` for the main controller comparisons
-- use `realism_ladder.yaml` and sensitivity manifests for evaluation-regime, overlay, and dynamics analysis
-- use `delay_breakdown.yaml` and `milp_reference.yaml` for focused supporting evidence rather than controller ranking tables
-- aggregate with `analysis/aggregate_runs.py`, then build completion-aware ranking tables with `analysis/tables.py`
-
-Current publication horizon policy:
-- `main.yaml`, `realism_ladder.yaml`, `sensitivity_load.yaml`, and `sensitivity_failure.yaml` use `epochs: 120` plus `drain_epochs: 60`.
-- `sota_pilot.yaml` uses `epochs: 80` plus `drain_epochs: 40` to keep pilot runs shorter.
-- the top-level `workload.repeat: true` repeats finite piecewise arrival regimes for the longer horizon.
-- the top-level `infrastructure.contact_schedule.repeat: true` repeats finite trace windows only when an expanded run already has a trace contact schedule.
-- old run artifacts from earlier horizon/contact settings should be deleted and regenerated.
+- say in a comment at the top of the manifest what it compares and how to analyze it
