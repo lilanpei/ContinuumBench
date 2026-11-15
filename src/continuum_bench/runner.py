@@ -193,9 +193,9 @@ class ContinuumBenchRunner:
         self._node_failure_policy = NodeFailureAvailabilityUpdatePolicy()
         self._install_failure_update_policy()
         self._failure_failed_tasks_this_epoch = 0
-        # Tasks destroyed in transit by a node outage. Buffer losses are collected from
-        # each buffer's ``discarded`` list; both feed the SLO horizon so discarded work
-        # cannot escape deadline accounting.
+        # Tasks lost outside a buffer: in transit to a failed node, or on a hop that has no
+        # buffer. Buffer losses are collected from each buffer's ``discarded`` list; both feed
+        # the SLO horizon, so discarded work counts as missed.
         self._failure_lost_tasks: List[Task] = []
 
         self.worker_pool_manager = WorkerPoolManager(
@@ -1127,9 +1127,9 @@ class ContinuumBenchRunner:
 
         seen_task_ids = set()
         # Work still in the system, plus work the run destroyed (buffer overflow, TTL
-        # expiry, retry exhaustion, node outage). Both are equally "not delivered on
-        # time": counting only the former let a controller improve its SLO rate by
-        # discarding tasks, since a discarded task left the queues/buffers/inflight
+        # expiry, retry exhaustion, node outage, a hop without a buffer). Both are equally
+        # "not delivered on time": counting only the former let a controller improve its SLO
+        # rate by discarding tasks, since a discarded task left the queues/buffers/inflight
         # sets and so was never eligible.
         for task in self._horizon_unfinished_tasks() + self._horizon_lost_tasks():
             if task.task_id in seen_task_ids:
@@ -1183,7 +1183,8 @@ class ContinuumBenchRunner:
         """Collect tasks the run destroyed rather than delivered.
 
         Covers every buffer loss path (overflow rejection, eviction, retry exhaustion,
-        TTL expiry) plus tasks lost in transit to a node outage.
+        TTL expiry), tasks lost in transit to a node outage, and tasks sent on a hop that
+        has no buffer.
         """
 
         tasks: List[Task] = list(self._failure_lost_tasks)
@@ -1269,6 +1270,10 @@ class ContinuumBenchRunner:
         runtime = self.stage_runtimes[src_stage]
         buffer = runtime.buffers.get(dst_stage)
         if buffer is None:
+            # No buffer exists for this hop, so the task cannot be retried and is lost here.
+            # Record it, so that the loss counts as a failure and as an SLO violation.
+            self._failure_lost_tasks.append(task)
+            self._failure_failed_tasks_this_epoch += 1
             return
 
         payload = {
