@@ -233,8 +233,8 @@ def build_extended_continuum(config: Dict[str, Any], seed: int) -> Infrastructur
     # Optional intra-tier connectivity. Without it, same-tier nodes are only reachable
     # through the tier above -- two edge nodes talk via the cloud, so spreading stages
     # across the edge tier costs two WAN crossings and "keep work local" is penalized
-    # rather than rewarded. Off by default: enabling it changes path lengths, and so
-    # results, for every existing scenario.
+    # rather than rewarded. The scenario configs mesh their edge tier this way; a config
+    # without the block keeps the tiered graph alone.
     #
     #   infrastructure:
     #     intra_tier:
@@ -242,7 +242,11 @@ def build_extended_continuum(config: Dict[str, Any], seed: int) -> Infrastructur
     intra_tier_cfg = config.get("intra_tier", {}) or {}
     tier_nodes = {"cloud": cloud_nodes, "edge": edge_nodes, "iot": iot_nodes, "space": space_nodes}
     for tier, link_cfg in intra_tier_cfg.items():
-        nodes = tier_nodes.get(str(tier).lower(), [])
+        if str(tier).lower() not in tier_nodes:
+            raise ValueError(
+                f"infrastructure.intra_tier: unknown tier {tier!r}; use one of {sorted(tier_nodes)}"
+            )
+        nodes = tier_nodes[str(tier).lower()]
         if not link_cfg or len(nodes) < 2:
             continue
         link = _resolve_link_profile(

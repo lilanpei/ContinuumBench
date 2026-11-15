@@ -8,7 +8,7 @@ scenario_config:
 
 infrastructure:
   infrastructure_id: driving_small_infra
-  n_space: 1
+  n_space: 0
   n_iot: 3
   n_edge: 2
   n_cloud: 1
@@ -18,6 +18,9 @@ infrastructure:
     on_duration_s: 5
     up_bandwidth_mbps: 35
     down_bandwidth_mbps: 0
+  # The edge nodes share a LAN; without these links they reach each other only through the cloud.
+  intra_tier:
+    edge: {latency: 1.0, bandwidth: 10000.0}
 
 workload:
   streams:
