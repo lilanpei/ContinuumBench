@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This directory contains the sweep manifests of the ContinuumBench paper. The paper's values come from version 1.0.1, the tag `v1.0.1-europar-frame`, whose REPRODUCE.md maps each table and finding to its manifest; see [REPRODUCE.md](../REPRODUCE.md) for how version 1.1 differs. The intent-compiler paper runs its experiments from the companion repository, so it has no manifest here.
+This directory contains the sweep manifests of the ContinuumBench paper. The paper's values come from version 1.0.1, the tag `v1.0.1`, whose REPRODUCE.md maps each table and finding to its manifest; see [REPRODUCE.md](../REPRODUCE.md) for how version 1.1 differs. The intent-compiler paper runs its experiments from the companion repository, so it has no manifest here.
 
 ## Key Files
 

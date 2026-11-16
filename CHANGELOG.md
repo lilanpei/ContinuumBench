@@ -27,7 +27,7 @@ Version 1.1.1 is on `main`. It brings the scenario configs, the sweeps and the a
 
 ## 1.1.0 (2026-11-13)
 
-Version 1.1.0 is on `main`. It adds what the intent-compiler paper (RISE-DL 2026) needs: three scenario variants, the controllers they use, and a knob interface through which an intent compiler sets the controller's parameters. It also changes some simulator behavior and accounting, which can alter the results of runs that version 1.0 supports, so the ContinuumBench paper's results come from the branch `europar-frame-2026` and the tag `v1.0.1-europar-frame`.
+Version 1.1.0 is on `main`. It adds what the intent-compiler paper (RISE-DL 2026) needs: three scenario variants, the controllers they use, and a knob interface through which an intent compiler sets the controller's parameters. It also changes some simulator behavior and accounting, which can alter the results of runs that version 1.0 supports, so the ContinuumBench paper's results come from the branch `europar-frame-2026` and the tag `v1.0.1`.
 
 ### Added
 
@@ -57,8 +57,8 @@ These changes can alter the results of runs that version 1.0 also supports. Vers
 
 ## 1.0.1 (2026-11-15)
 
-The version of the ContinuumBench paper's results (FRAME 2026 at Euro-Par 2026), on the branch `europar-frame-2026` and the tag `v1.0.1-europar-frame`. It adds to version 1.0.0 the simulator fixes, the edge-tier LAN and the Driving V2X node count with which the paper's results were produced, and the sweeps and analysis of the paper's findings; that branch's changelog lists them.
+The version of the ContinuumBench paper's results (FRAME 2026 at Euro-Par 2026), on the branch `europar-frame-2026` and the tag `v1.0.1`. It adds to version 1.0.0 the simulator fixes, the edge-tier LAN and the Driving V2X node count with which the paper's results were produced, and the sweeps and analysis of the paper's findings; that branch's changelog lists them.
 
 ## 1.0.0
 
-The first release of the ContinuumBench paper's code, tagged `v1.0-europar-frame`.
+The first release of the ContinuumBench paper's code.

@@ -5,7 +5,7 @@
 Reproduce the ContinuumBench paper (FRAME 2026 at Euro-Par 2026) with version 1.0.1:
 
 ```bash
-git checkout v1.0.1-europar-frame
+git checkout v1.0.1
 ```
 
 Its `REPRODUCE.md` maps every table and finding of the paper to the sweep that produces it, the

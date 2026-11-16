@@ -1,6 +1,6 @@
 # Analysis Pipeline
 
-> **Reproducing the ContinuumBench paper:** use the tag `v1.0.1-europar-frame`, whose
+> **Reproducing the ContinuumBench paper:** use the tag `v1.0.1`, whose
 > REPRODUCE.md maps each table and finding to its sweep and gives the values to expect;
 > `make reproduce` runs the sweeps, aggregates them and prints the numbers with `findings.py`.
 

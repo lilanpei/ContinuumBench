@@ -33,7 +33,7 @@ ContinuumBench is ECLYPSE-native by default: application graphs, infrastructure 
 
 | Version | Where | Paper |
 |---|---|---|
-| 1.0 | branch `europar-frame-2026`, tag `v1.0.1-europar-frame` | [ContinuumBench: Benchmarking Joint Autoscaling and Placement Across Evaluation Regimes in the Cloud-Edge Continuum](https://arxiv.org/abs/2609.08946) (FRAME 2026 at Euro-Par 2026) |
+| 1.0 | branch `europar-frame-2026`, tag `v1.0.1` | [ContinuumBench: Benchmarking Joint Autoscaling and Placement Across Evaluation Regimes in the Cloud-Edge Continuum](https://arxiv.org/abs/2609.08946) (FRAME 2026 at Euro-Par 2026) |
 | 1.1 | branch `main`, tags `v1.1.0` and `v1.1.1` | [Continual Instruction Tuning for LLM-based Management of Continuum Resources](https://arxiv.org/abs/2611.10292) (RISE-DL 2026 at IoT 2026) |
 
 This README calls them the ContinuumBench paper and the intent-compiler paper. The second trains an intent compiler, a language model that translates a management intent in natural language into the parameters of a controller. Version 1.1 adds three scenario variants, the controllers they use, and a knob interface through which an intent compiler sets the controller's parameters. It also changes some simulator behavior (see [CHANGELOG.md](CHANGELOG.md)), so the ContinuumBench paper's results come from version 1.0.1, on the branch `europar-frame-2026`. Version 1.1.1 brings the ContinuumBench paper's scenario configs, sweeps and analysis in line with version 1.0.1. The intent compiler itself, its data and its trained adapters are in the companion repository [continuum-intent-compiler](https://github.com/lilanpei/continuum-intent-compiler).
@@ -205,12 +205,12 @@ Epoch-level resource records expose both views:
 
 ## Reproduce The Papers
 
-Reproduce the ContinuumBench paper with version 1.0.1, the tag `v1.0.1-europar-frame` on the branch
+Reproduce the ContinuumBench paper with version 1.0.1, the tag `v1.0.1` on the branch
 `europar-frame-2026`, whose **REPRODUCE.md** maps every table and finding to its sweep and gives the
 values to expect:
 
 ```bash
-git checkout v1.0.1-europar-frame
+git checkout v1.0.1
 make reproduce   # the paper's sweeps, their aggregation, and every number
 make test        # regression suite, including the pinned headline numbers
 ```
