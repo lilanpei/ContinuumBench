@@ -2,7 +2,7 @@
 
 ## 1.0.1 (2026-11-15)
 
-Version 1.0.1 is on the branch `europar-frame-2026` and the tag `v1.0.1-europar-frame`. It gives the ContinuumBench paper's results, and it adds the sweeps and the analysis of the paper's findings. [REPRODUCE.md](REPRODUCE.md) maps every table and finding to its sweep, gives the values to expect and lists the few printed values that differ.
+Version 1.0.1 is on the branch `europar-frame-2026` and the tag `v1.0.1`. It gives the ContinuumBench paper's results, and it adds the sweeps and the analysis of the paper's findings. [REPRODUCE.md](REPRODUCE.md) maps every table and finding to its sweep, gives the values to expect and lists the few printed values that differ.
 
 ### Changed
 
@@ -35,4 +35,4 @@ These change the tools, not the results:
 
 ## 1.0.0
 
-The first release of the ContinuumBench paper's code (FRAME 2026 at Euro-Par 2026), tagged `v1.0-europar-frame`.
+The first release of the ContinuumBench paper's code (FRAME 2026 at Euro-Par 2026).

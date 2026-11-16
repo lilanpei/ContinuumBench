@@ -28,10 +28,10 @@ ContinuumBench is ECLYPSE-native by default: application graphs, infrastructure 
 
 | Version | Where | Paper |
 |---|---|---|
-| 1.0 | this branch, `europar-frame-2026`; tag `v1.0.1-europar-frame` | [ContinuumBench: Benchmarking Joint Autoscaling and Placement Across Evaluation Regimes in the Cloud-Edge Continuum](https://arxiv.org/abs/2609.08946) (FRAME 2026 at Euro-Par 2026) |
+| 1.0 | this branch, `europar-frame-2026`; tag `v1.0.1` | [ContinuumBench: Benchmarking Joint Autoscaling and Placement Across Evaluation Regimes in the Cloud-Edge Continuum](https://arxiv.org/abs/2609.08946) (FRAME 2026 at Euro-Par 2026) |
 | 1.1 | branch `main`, tags `v1.1.0` and `v1.1.1` | [Continual Instruction Tuning for LLM-based Management of Continuum Resources](https://arxiv.org/abs/2611.10292) (RISE-DL 2026 at IoT 2026) |
 
-This README calls the first the ContinuumBench paper. Version 1.0.1, on this branch, reproduces its results, with the few printed differences that **[REPRODUCE.md](REPRODUCE.md)** lists; that guide maps every table and finding to its sweep. The first release, tag `v1.0-europar-frame`, lacks the simulator fixes, the edge-tier LAN and the node count of Driving V2X with which the paper's results were produced, and the sweeps of its Findings 1 to 3 (see [CHANGELOG.md](CHANGELOG.md)). Version 1.1, on `main`, changes further simulator behavior for the intent-compiler paper, so reproduce the ContinuumBench paper on this branch.
+This README calls the first the ContinuumBench paper. Version 1.0.1, on this branch, reproduces its results, with the few printed differences that **[REPRODUCE.md](REPRODUCE.md)** lists; that guide maps every table and finding to its sweep. Compared with the first release, version 1.0.1 adds the simulator fixes, the edge-tier LAN and the node count of Driving V2X with which the paper's results were produced, and the sweeps of its Findings 1 to 3 (see [CHANGELOG.md](CHANGELOG.md)). Version 1.1, on `main`, changes further simulator behavior for the intent-compiler paper, so reproduce the ContinuumBench paper on this branch.
 
 ## Install
 

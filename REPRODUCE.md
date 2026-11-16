@@ -5,10 +5,9 @@ to the sweep that produces it, the command that prints its numbers, and the valu
 pipeline is deterministic and file-based:
 **sweep manifests → run directories → printed values**.
 
-Use version 1.0.1: this branch, `europar-frame-2026`, or its tag `v1.0.1-europar-frame`. The first
-release, tag `v1.0-europar-frame`, lacks the simulator fixes and the topology with which the
-paper's results were produced (see [CHANGELOG.md](CHANGELOG.md)), and version 1.1, on `main`,
-changes further simulator behavior.
+Use version 1.0.1: this branch, `europar-frame-2026`, or its tag `v1.0.1`. It has the simulator
+fixes and the topology with which the paper's results were produced (see
+[CHANGELOG.md](CHANGELOG.md)); version 1.1, on `main`, changes further simulator behavior.
 
 ## 1. Environment
 
